@@ -1,6 +1,9 @@
 #!/usr/bin/env python
+from __future__ import with_statement
+
 import os
 import sys
+import glob
 import httplib
 import urlparse
 import itertools
@@ -91,29 +94,84 @@ class Trac(object):
             rval[res['id'] - 1] = res['result']
         return rval
 
+    def recent_tickets(self, recent):
+        return self.call('ticket.getRecentChanges', [{"__jsonclass__": ["datetime", recent]}])
 
-def dumps(val):
-    return json.dumps(val, sort_keys=True, indent=4)
+    def component_list(self):
+        return self.call('ticket.component.getAll', [])
+
+    def yield_components(self, components):
+        return itertools.izip(
+            components,
+            self.imulticall([('ticket.component.get', [component])
+                             for component in components]))
+
+    def yield_field(self, field):
+        prefix = 'ticket.' + field
+        field_ids = self.call(prefix + '.getAll', [])
+        return itertools.izip(
+            field_ids,
+            self.imulticall([(prefix + '.get', [field_id])
+                             for field_id in field_ids]))
+
+    def yield_tickets(self, tickets):
+        return itertools.izip(
+            tickets,
+            self.imulticall([('ticket.get', [ticket_id])
+                             for ticket_id in tickets]))
+
+    def yield_changelogs(self, tickets):
+        return itertools.izip(
+            tickets,
+            self.imulticall([('ticket.changeLog', [ticket_id, 0])
+                             for ticket_id in tickets]))
+
+
+def read_tickets():
+    for fn in glob.glob('ticket/*.json'):
+        with open(fn, 'rb') as f:
+            data = json.load(f)
+        yield data
+
+
+def ticket_changed(lst):
+    _ticket_id, _created, changed, _props = lst
+    return changed['__jsonclass__'][1]
+
+
+def most_recent(tickets):
+    return max(
+        itertools.chain(
+            ["2000-01-01T00:00:00"],
+            itertools.imap(ticket_changed, tickets)))
 
 
 def main():
     user, password = sys.argv[1:]
     t = Trac(user, password)
-    recent = t.call('ticket.getRecentChanges', [{"__jsonclass__": ["datetime", "2000-01-01T00:00:00"]}])
-    print 'tickets:', len(recent)
+    recent = most_recent(read_tickets())
+    print 'most recent:', recent
+    recent_tickets = t.recent_tickets(recent)
+    print 'tickets:', len(recent_tickets)
     with open('tickets.json', 'wb') as f:
         f.write(json.dumps(recent))
-    for dirname in ('ticket', 'changelog'):
+    FIELDS = ('component', 'priority', 'resolution', 'severity', 'type', 'version')
+    for dirname in ('ticket', 'changelog') + FIELDS:
         if not os.path.exists(dirname):
             os.mkdir(dirname)
-    for ticket_id, info in itertools.izip(recent, t.imulticall([('ticket.get', [ticket_id]) for ticket_id in recent])):
+    for field_name in FIELDS:
+        for field_id, info in t.yield_field(field_name):
+            print field_name, field_id
+            with open('%s/%s.json' % (field_name, field_id), 'wb') as f:
+                f.write(json.dumps(info))
+    for ticket_id, info in t.yield_tickets(recent_tickets):
         print 'ticket', ticket_id
         with open('ticket/%s.json' % (ticket_id,), 'wb') as f:
             f.write(json.dumps(info))
-    for ticket_id, changelog in itertools.izip(recent, t.imulticall([('ticket.changeLog', [ticket_id, 0]) for ticket_id in recent])):
+    for ticket_id, info in t.yield_changelogs(recent_tickets):
         print 'changelog', ticket_id
         with open('changelog/%s.json' % (ticket_id,), 'wb') as f:
-            f.write(json.dumps(changelog))
+            f.write(json.dumps(info))
 
 
 if __name__ == '__main__':
