@@ -4,15 +4,26 @@ from __future__ import with_statement
 import os
 import sys
 import glob
+import urllib
 import httplib
 import urlparse
 import itertools
 
 import simplejson as json
 
+# TODO: real syncing
+# TODO: attachments
 TRAC_URL = 'https://trac.mochimedia.net/login/jsonrpc'
-FIELDS = ('component', 'priority', 'resolution', 'severity', 'type', 'version')
-DIRS = ('ticket', 'changelog') + FIELDS
+FIELDS = (
+    'component',
+    'priority',
+    'resolution',
+    'severity',
+    'type',
+    'version',
+    'milestone',
+)
+DIRS = ('ticket', 'changelog') + tuple('field/' + f for f in FIELDS)
 VERSION = 1
 MIN_RECENT = "2000-01-01T00:00:00"
 
@@ -94,6 +105,17 @@ def write_json(fn, data):
         json.dump(data, f)
     os.rename(tmpfn, fn)
 
+
+def ticket_changed(lst):
+    _ticket_id, _created, changed, _props = lst
+    return changed
+
+
+def url_safe_id(ident):
+    s = unicode(ident)
+    return urllib.quote_plus(s.encode('utf8'))
+
+
 class Trac(object):
     def __init__(self, user, password, url=TRAC_URL):
         self.url = url
@@ -159,20 +181,6 @@ class Trac(object):
                              for ticket_id in tickets]))
 
 
-def ticket_changed(lst):
-    _ticket_id, _created, changed, _props = lst
-    return changed
-
-
-def most_recent(tickets, default=None):
-    if default is None:
-        default = MIN_RECENT
-    return max(
-        itertools.chain(
-            [default],
-            itertools.imap(ticket_changed, tickets)))
-
-
 class DB(object):
     def __init__(self, root='.'):
         self.root = root
@@ -181,7 +189,7 @@ class DB(object):
     def init(self):
         for dirname in DIRS:
             if not os.path.exists(dirname):
-                os.mkdir(dirname)
+                os.makedirs(dirname)
         self.read_metadata()
         self.upgrade()
 
@@ -244,7 +252,10 @@ class DB(object):
             ## TODO: This is a bad sync, we do not
             ##       garbage collect field values that were deleted
             for field_id, info in t.yield_field(field_name):
-                write_json(self.path_join(field_name, '%s.json' % (field_id,)),
+                safe_id = url_safe_id(field_id)
+                write_json(self.path_join('field',
+                                          field_name,
+                                          '%s.json' % (safe_id,)),
                            info)
 
         print 'fetching changed ticket ids since', self.recent
@@ -254,9 +265,13 @@ class DB(object):
             write_json(self.path_join('ticket', '%s.json' % (ticket_id,)),
                        info)
         print 'fetching changelog for %d tickets' % (len(recent_tickets),)
+        new_recent = self.recent
         for ticket_id, info in t.yield_changelogs(recent_tickets):
+            new_recent = max(new_recent, ticket_changed(info))
             write_json(self.path_join('changelog', '%s.json' % (ticket_id,)),
                        info)
+        self.metadata['recent'] = new_recent
+        self.write_metadata()
 
 
 def main():
