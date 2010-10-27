@@ -261,17 +261,18 @@ class DB(object):
         print 'fetching changed ticket ids since', self.recent
         recent_tickets = t.recent_tickets(self.recent)
         print 'fetching metadata for %d tickets' % (len(recent_tickets),)
+        new_recent = self.recent
         for ticket_id, info in t.yield_tickets(recent_tickets):
+            new_recent = max(new_recent, ticket_changed(info))
             write_json(self.path_join('ticket', '%s.json' % (ticket_id,)),
                        info)
         print 'fetching changelog for %d tickets' % (len(recent_tickets),)
-        new_recent = self.recent
         for ticket_id, info in t.yield_changelogs(recent_tickets):
-            new_recent = max(new_recent, ticket_changed(info))
             write_json(self.path_join('changelog', '%s.json' % (ticket_id,)),
                        info)
         self.metadata['recent'] = new_recent
         self.write_metadata()
+        print 'synced up to', self.recent
 
 
 def main():
