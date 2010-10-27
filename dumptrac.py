@@ -206,6 +206,8 @@ class DB(object):
             self.write_metadata()
 
     def upgrade_0_1(self):
+        # First version didn't cache recent or de-jsonclass datetime
+        print 'upgrading version 0 db to version 1'
         recent = MIN_RECENT
         for dirname in DIRS:
             for fn, data in self.iter_jsondir(dirname):
@@ -232,22 +234,29 @@ class DB(object):
         for _fn, data in self.iter_jsondir('ticket'):
             yield data
 
+    @property
+    def recent(self):
+        return self.metadata['recent']
+
     def pull(self, t):
         for field_name in FIELDS:
             print 'syncing', field_name
             ## TODO: This is a bad sync, we do not
             ##       garbage collect field values that were deleted
             for field_id, info in t.yield_field(field_name):
-                write_json(self.path_join(field_name, '%s.json' % (field_id,)))
+                write_json(self.path_join(field_name, '%s.json' % (field_id,)),
+                           info)
 
         print 'fetching changed ticket ids since', self.recent
         recent_tickets = t.recent_tickets(self.recent)
         print 'fetching metadata for %d tickets' % (len(recent_tickets),)
         for ticket_id, info in t.yield_tickets(recent_tickets):
-            write_json(self.path_join('ticket', '%s.json' % (ticket_id,)))
+            write_json(self.path_join('ticket', '%s.json' % (ticket_id,)),
+                       info)
         print 'fetching changelog for %d tickets' % (len(recent_tickets),)
         for ticket_id, info in t.yield_changelogs(recent_tickets):
-            write_json(self.path_join('changelog', '%s.json' % (ticket_id,)))
+            write_json(self.path_join('changelog', '%s.json' % (ticket_id,)),
+                       info)
 
 
 def main():
