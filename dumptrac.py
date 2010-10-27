@@ -70,18 +70,29 @@ def jsondatetime(s):
 
 
 def normalize_in_place(o):
-    if not isinstance(o, dict):
-        return o
-    elif '__jsonclass__' in o:
-        v = o['__jsonclass__']
-        assert v[0] == 'datetime'
-        return v[1]
-    for k, v in o.iteritems():
-        v1 = normalize_in_place(v)
-        if v1 is not v:
-            o[k] = v1
+    if isinstance(o, dict):
+        if '__jsonclass__' in o:
+            v = o['__jsonclass__']
+            assert v[0] == 'datetime'
+            return v[1]
+        for k, v in o.iteritems():
+            v1 = normalize_in_place(v)
+            if v1 is not v:
+                o[k] = v1
+    elif isinstance(o, list):
+        for i, v in enumerate(o):
+            v1 = normalize_in_place(v)
+            if v1 is not v:
+                o[i] = v1
     return o
 
+
+def write_json(fn, data):
+    dirname, basename = os.path.split(fn)
+    tmpfn = os.path.join(dirname, '.' + basename)
+    with open(tmpfn, 'wb') as f:
+        json.dump(data, f)
+    os.rename(tmpfn, fn)
 
 class Trac(object):
     def __init__(self, user, password, url=TRAC_URL):
@@ -182,9 +193,7 @@ class DB(object):
             pass
 
     def write_metadata(self):
-        with open('.db.json', 'wb') as f:
-            json.dump(self.metadata, f)
-        os.rename('.db.json', 'db.json')
+        write_json(self.path_join('db.json'), self.metadata)
 
     def upgrade(self):
         while True:
@@ -192,20 +201,19 @@ class DB(object):
             if dbver == VERSION:
                 return
             if dbver == 0:
-                self.upgrade_0_1(self)
+                self.upgrade_0_1()
             assert self.metadata['version'] > dbver
             self.write_metadata()
 
     def upgrade_0_1(self):
-        tickets = []
+        recent = MIN_RECENT
         for dirname in DIRS:
             for fn, data in self.iter_jsondir(dirname):
-                s = json.dumps(normalize_in_place(data))
+                data = normalize_in_place(data)
                 if dirname == 'ticket':
-                    tickets.append(data)
-                with open(fn, 'wb') as f:
-                    f.write(s)
-        self.metadata['recent'] = most_recent(tickets)
+                    recent = max(recent, ticket_changed(data))
+                write_json(fn, data)
+        self.metadata['recent'] = recent
         self.metadata['version'] = 1
 
     def path_join(self, *args):
@@ -224,31 +232,30 @@ class DB(object):
         for _fn, data in self.iter_jsondir('ticket'):
             yield data
 
+    def pull(self, t):
+        for field_name in FIELDS:
+            print 'syncing', field_name
+            ## TODO: This is a bad sync, we do not
+            ##       garbage collect field values that were deleted
+            for field_id, info in t.yield_field(field_name):
+                write_json(self.path_join(field_name, '%s.json' % (field_id,)))
+
+        print 'fetching changed ticket ids since', self.recent
+        recent_tickets = t.recent_tickets(self.recent)
+        print 'fetching metadata for %d tickets' % (len(recent_tickets),)
+        for ticket_id, info in t.yield_tickets(recent_tickets):
+            write_json(self.path_join('ticket', '%s.json' % (ticket_id,)))
+        print 'fetching changelog for %d tickets' % (len(recent_tickets),)
+        for ticket_id, info in t.yield_changelogs(recent_tickets):
+            write_json(self.path_join('changelog', '%s.json' % (ticket_id,)))
+
 
 def main():
     user, password = sys.argv[1:]
     t = Trac(user, password)
     db = DB('.')
     db.init()
-    recent = most_recent(read_tickets())
-    print 'most recent:', recent
-    recent_tickets = t.recent_tickets(recent)
-    print 'tickets:', len(recent_tickets)
-    with open('tickets.json', 'wb') as f:
-        f.write(json.dumps(recent))
-    for field_name in FIELDS:
-        for field_id, info in t.yield_field(field_name):
-            print field_name, field_id
-            with open('%s/%s.json' % (field_name, field_id), 'wb') as f:
-                f.write(json.dumps(info))
-    for ticket_id, info in t.yield_tickets(recent_tickets):
-        print 'ticket', ticket_id
-        with open('ticket/%s.json' % (ticket_id,), 'wb') as f:
-            f.write(json.dumps(info))
-    for ticket_id, info in t.yield_changelogs(recent_tickets):
-        print 'changelog', ticket_id
-        with open('changelog/%s.json' % (ticket_id,), 'wb') as f:
-            f.write(json.dumps(info))
+    db.pull(t)
 
 
 if __name__ == '__main__':
