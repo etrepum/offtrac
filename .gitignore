@@ -1,9 +1,9 @@
 *.pyc
 *.pyo
-/tickets.json
 /ticket
 /changelog
 /component
 /priority
 /resolution
 /type
+/db.json

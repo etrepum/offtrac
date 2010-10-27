@@ -11,7 +11,10 @@ import itertools
 import simplejson as json
 
 TRAC_URL = 'https://trac.mochimedia.net/login/jsonrpc'
-
+FIELDS = ('component', 'priority', 'resolution', 'severity', 'type', 'version')
+DIRS = ('ticket', 'changelog') + FIELDS
+VERSION = 1
+MIN_RECENT = "2000-01-01T00:00:00"
 
 def get_http_connection(scheme, host):
     """Get a request scoped httplib.HTTPConnection for host
@@ -62,6 +65,24 @@ def raw_http_request(method, url, body=None, headers={}):
     return body
 
 
+def jsondatetime(s):
+    return {"__jsonclass__": ["datetime", s]}
+
+
+def normalize_in_place(o):
+    if not isinstance(o, dict):
+        return o
+    elif '__jsonclass__' in o:
+        v = o['__jsonclass__']
+        assert v[0] == 'datetime'
+        return v[1]
+    for k, v in o.iteritems():
+        v1 = normalize_in_place(v)
+        if v1 is not v:
+            o[k] = v1
+    return o
+
+
 class Trac(object):
     def __init__(self, user, password, url=TRAC_URL):
         self.url = url
@@ -74,7 +95,7 @@ class Trac(object):
         return json.loads(res)
 
     def call(self, method, params):
-        res = self.raw_call(method, params)
+        res = normalize_in_place(self.raw_call(method, params))
         if res['error']:
             raise ValueError(res['error'])
         return res['result']
@@ -95,7 +116,7 @@ class Trac(object):
         return rval
 
     def recent_tickets(self, recent):
-        return self.call('ticket.getRecentChanges', [{"__jsonclass__": ["datetime", recent]}])
+        return self.call('ticket.getRecentChanges', [jsondatetime(recent)])
 
     def component_list(self):
         return self.call('ticket.component.getAll', [])
@@ -127,38 +148,94 @@ class Trac(object):
                              for ticket_id in tickets]))
 
 
-def read_tickets():
-    for fn in glob.glob('ticket/*.json'):
-        with open(fn, 'rb') as f:
-            data = json.load(f)
-        yield data
-
-
 def ticket_changed(lst):
     _ticket_id, _created, changed, _props = lst
-    return changed['__jsonclass__'][1]
+    return changed
 
 
-def most_recent(tickets):
+def most_recent(tickets, default=None):
+    if default is None:
+        default = MIN_RECENT
     return max(
         itertools.chain(
-            ["2000-01-01T00:00:00"],
+            [default],
             itertools.imap(ticket_changed, tickets)))
+
+
+class DB(object):
+    def __init__(self, root='.'):
+        self.root = root
+        self.metadata = {}
+
+    def init(self):
+        for dirname in DIRS:
+            if not os.path.exists(dirname):
+                os.mkdir(dirname)
+        self.read_metadata()
+        self.upgrade()
+
+    def read_metadata(self):
+        try:
+            with open('db.json', 'rb') as f:
+                self.metadata = json.load(f)
+        except IOError:
+            pass
+
+    def write_metadata(self):
+        with open('.db.json', 'wb') as f:
+            json.dump(self.metadata, f)
+        os.rename('.db.json', 'db.json')
+
+    def upgrade(self):
+        while True:
+            dbver = self.metadata.get('version', VERSION)
+            if dbver == VERSION:
+                return
+            if dbver == 0:
+                self.upgrade_0_1(self)
+            assert self.metadata['version'] > dbver
+            self.write_metadata()
+
+    def upgrade_0_1(self):
+        tickets = []
+        for dirname in DIRS:
+            for fn, data in self.iter_jsondir(dirname):
+                s = json.dumps(normalize_in_place(data))
+                if dirname == 'ticket':
+                    tickets.append(data)
+                with open(fn, 'wb') as f:
+                    f.write(s)
+        self.metadata['recent'] = most_recent(tickets)
+        self.metadata['version'] = 1
+
+    def path_join(self, *args):
+        return os.path.join(self.root, *args)
+
+    def json_glob(self, dirname):
+        return glob.glob(self.path_join(dirname, '*.json'))
+
+    def iter_jsondir(self, dirname):
+        for fn in self.json_glob(dirname):
+            with open(fn, 'rb') as f:
+                data = json.load(f)
+            yield fn, data
+
+    def read_tickets(self):
+        for _fn, data in self.iter_jsondir('ticket'):
+            yield data
 
 
 def main():
     user, password = sys.argv[1:]
     t = Trac(user, password)
+    db = DB('.')
+    db.init()
     recent = most_recent(read_tickets())
     print 'most recent:', recent
     recent_tickets = t.recent_tickets(recent)
     print 'tickets:', len(recent_tickets)
     with open('tickets.json', 'wb') as f:
         f.write(json.dumps(recent))
-    FIELDS = ('component', 'priority', 'resolution', 'severity', 'type', 'version')
-    for dirname in ('ticket', 'changelog') + FIELDS:
-        if not os.path.exists(dirname):
-            os.mkdir(dirname)
     for field_name in FIELDS:
         for field_id, info in t.yield_field(field_name):
             print field_name, field_id
