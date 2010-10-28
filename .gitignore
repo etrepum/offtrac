@@ -1,10 +1,6 @@
 *.pyc
 *.pyo
-/tickets.json
 /ticket
 /changelog
-/component
-/priority
-/resolution
-/type
+/field
 /db.json
