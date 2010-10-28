@@ -2,7 +2,7 @@
 """
 # TODO: real syncing
 # TODO: attachments
-# TODO: reports
+# TODO: wiki
 # TODO: trac compatible report db
 
 """

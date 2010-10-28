@@ -11,3 +11,5 @@ this syntax, so maybe we punt on this for now.
 https://trac.mochimedia.net/query
 https://trac.mochimedia.net/wiki/TracQuery
 
+DB schema:
+http://trac.edgewall.org/wiki/TracDev/DatabaseSchema
