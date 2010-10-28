@@ -1,4 +1,11 @@
 #!/usr/bin/env python
+"""
+# TODO: real syncing
+# TODO: attachments
+# TODO: reports
+# TODO: trac compatible report db
+
+"""
 from __future__ import with_statement
 
 import os
@@ -11,8 +18,7 @@ import itertools
 
 import simplejson as json
 
-# TODO: real syncing
-# TODO: attachments
+
 TRAC_URL = 'https://trac.mochimedia.net/login/jsonrpc'
 FIELDS = (
     'component',
