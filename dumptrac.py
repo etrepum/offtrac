@@ -12,9 +12,11 @@ import os
 import sys
 import glob
 import urllib
+import getpass
 import httplib
 import urlparse
 import itertools
+import subprocess
 
 import simplejson as json
 
@@ -312,9 +314,21 @@ class DB(object):
         print 'synced up to', self.recent
 
 
+def keychain_auth(url):
+    (_scheme, netloc, _path,
+     _query, _fragment) = urlparse.urlsplit(url)
+    username = getpass.getuser()
+    (_stdout, stderr) = subprocess.Popen(
+        ["security", "find-internet-password", "-g", "-s", netloc],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE).communicate()
+    password = stderr.split('"')[1]
+    return username, password
+
+
 def main():
-    user, password = sys.argv[1:]
-    t = Trac(user, password)
+    user, password = keychain_auth(TRAC_URL)
+    t = Trac(user, password, TRAC_URL)
     db = DB('.')
     db.init()
     db.pull(t)
