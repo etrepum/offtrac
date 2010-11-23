@@ -9,7 +9,6 @@
 from __future__ import with_statement
 
 import os
-import sys
 import glob
 import urllib
 import getpass
