@@ -1,3 +1,4 @@
+import os
 import time
 import urllib
 import calendar
@@ -11,6 +12,10 @@ from . import dumptrac
 
 
 Base = declarative_base()
+
+
+def path_id(path):
+    return urllib.unquote_plus(os.path.basename(path).rpartition('.')[0])
 
 
 def orm_name(name):
@@ -36,6 +41,13 @@ def iso8601_to_trac_time(isodatetime):
     return int(calendar.timegm(utc_tuple) * 1000)
 
 
+def new_bigtime(isodatetime, old_bigtime=None):
+    bigtime = iso8601_to_trac_time(isodatetime)
+    if old_bigtime is None or bigtime > old_bigtime:
+        return bigtime
+    return old_bigtime + 1
+
+
 class ETL(object):
     def __init__(self, filedb, Session):
         self.filedb = filedb
@@ -55,8 +67,7 @@ class ETL(object):
         Enum = make_orm_class(model.enum)
         for enum_type in ('priority', 'resolution', 'severity', 'type'):
             for fn, data in self.filedb.iter_jsondir('field/' + enum_type):
-                name = urllib.unquote_plus(fn.rpartition('.')[0])
-                yield Enum(type=enum_type, name=name, value=data)
+                yield Enum(type=enum_type, name=path_id(fn), value=data)
 
 
     def ormify_fields(self):
@@ -78,11 +89,12 @@ class ETL(object):
     def ormify_changelog(self):
         TicketChange = make_orm_class(model.ticket_change)
         for fn, data in self.filedb.iter_jsondir('changelog'):
-            ticket_id = fn.rpartition('.')[0]
+            bigtime = None
             for isotime, author, field, oldvalue, newvalue, _permanent in data:
+                bigtime = new_bigtime(isotime, bigtime)
                 yield TicketChange(
-                    ticket=ticket_id,
-                    time=iso8601_to_trac_time(isotime),
+                    ticket=path_id(fn),
+                    time=bigtime,
                     author=author,
                     field=field,
                     oldvalue=oldvalue,
@@ -91,9 +103,8 @@ class ETL(object):
     def ormify_report(self):
         Report = make_orm_class(model.report)
         for fn, props in self.filedb.iter_jsondir('report'):
-            report_id = fn.rpartition('.')[0]
             yield Report(
-                id=report_id,
+                id=path_id(fn),
                 title=props['title'],
                 query=props['sql'],
                 author='',
