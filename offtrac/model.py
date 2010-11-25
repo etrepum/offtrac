@@ -5,59 +5,6 @@ BIGINT = INTEGER
 
 metadata = MetaData()
 
-system =  Table('system', metadata,
-    Column(u'name', TEXT(length=None, convert_unicode=False, assert_unicode=None, unicode_error=None, _warn_on_bytestring=False), primary_key=True, nullable=False),
-    Column(u'value', TEXT(length=None, convert_unicode=False, assert_unicode=None, unicode_error=None, _warn_on_bytestring=False), primary_key=False),
-)
-Index('system_pkey', system.c.name, unique=True)
-
-
-permission =  Table('permission', metadata,
-    Column(u'username', TEXT(length=None, convert_unicode=False, assert_unicode=None, unicode_error=None, _warn_on_bytestring=False), primary_key=True, nullable=False),
-    Column(u'action', TEXT(length=None, convert_unicode=False, assert_unicode=None, unicode_error=None, _warn_on_bytestring=False), primary_key=True, nullable=False),
-)
-Index('permission_pk', permission.c.username, permission.c.action, unique=True)
-
-
-node_change =  Table('node_change', metadata,
-    Column(u'repos', INTEGER(), primary_key=True, nullable=False),
-    Column(u'rev', TEXT(length=None, convert_unicode=False, assert_unicode=None, unicode_error=None, _warn_on_bytestring=False), primary_key=True, nullable=False),
-    Column(u'path', TEXT(length=None, convert_unicode=False, assert_unicode=None, unicode_error=None, _warn_on_bytestring=False), primary_key=True, nullable=False),
-    Column(u'node_type', TEXT(length=None, convert_unicode=False, assert_unicode=None, unicode_error=None, _warn_on_bytestring=False), primary_key=False),
-    Column(u'change_type', TEXT(length=None, convert_unicode=False, assert_unicode=None, unicode_error=None, _warn_on_bytestring=False), primary_key=True, nullable=False),
-    Column(u'base_path', TEXT(length=None, convert_unicode=False, assert_unicode=None, unicode_error=None, _warn_on_bytestring=False), primary_key=False),
-    Column(u'base_rev', TEXT(length=None, convert_unicode=False, assert_unicode=None, unicode_error=None, _warn_on_bytestring=False), primary_key=False),
-)
-Index(u'node_change_repos_rev_idx', node_change.c.repos, node_change.c.rev, unique=False)
-
-
-auth_cookie =  Table('auth_cookie', metadata,
-    Column(u'cookie', TEXT(length=None, convert_unicode=False, assert_unicode=None, unicode_error=None, _warn_on_bytestring=False), primary_key=True, nullable=False),
-    Column(u'name', TEXT(length=None, convert_unicode=False, assert_unicode=None, unicode_error=None, _warn_on_bytestring=False), primary_key=True, nullable=False),
-    Column(u'ipnr', TEXT(length=None, convert_unicode=False, assert_unicode=None, unicode_error=None, _warn_on_bytestring=False), primary_key=True, nullable=False),
-    Column(u'time', INTEGER(), primary_key=False),
-)
-Index('auth_cookie_pk', auth_cookie.c.cookie, auth_cookie.c.ipnr, auth_cookie.c.name, unique=True)
-
-
-session =  Table('session', metadata,
-    Column(u'sid', TEXT(length=None, convert_unicode=False, assert_unicode=None, unicode_error=None, _warn_on_bytestring=False), primary_key=True, nullable=False),
-    Column(u'authenticated', INTEGER(), primary_key=True, nullable=False),
-    Column(u'last_visit', INTEGER(), primary_key=False),
-)
-Index(u'session_authenticated_idx', session.c.authenticated, unique=False)
-Index(u'session_last_visit_idx', session.c.last_visit, unique=False)
-
-
-session_attribute =  Table('session_attribute', metadata,
-    Column(u'sid', TEXT(length=None, convert_unicode=False, assert_unicode=None, unicode_error=None, _warn_on_bytestring=False), primary_key=True, nullable=False),
-    Column(u'authenticated', INTEGER(), primary_key=True, nullable=False),
-    Column(u'name', TEXT(length=None, convert_unicode=False, assert_unicode=None, unicode_error=None, _warn_on_bytestring=False), primary_key=True, nullable=False),
-    Column(u'value', TEXT(length=None, convert_unicode=False, assert_unicode=None, unicode_error=None, _warn_on_bytestring=False), primary_key=False),
-)
-Index('session_attribute_pk', session_attribute.c.sid, session_attribute.c.authenticated, session_attribute.c.name, unique=True)
-
-
 attachment =  Table('attachment', metadata,
     Column(u'type', TEXT(length=None, convert_unicode=False, assert_unicode=None, unicode_error=None, _warn_on_bytestring=False), primary_key=True, nullable=False),
     Column(u'id', TEXT(length=None, convert_unicode=False, assert_unicode=None, unicode_error=None, _warn_on_bytestring=False), primary_key=True, nullable=False),
@@ -135,13 +82,6 @@ ticket_change =  Table('ticket_change', metadata,
 )
 Index(u'ticket_change_ticket_idx', ticket_change.c.ticket, unique=False)
 Index(u'ticket_change_time_idx', ticket_change.c.time, unique=False)
-
-
-cache =  Table('cache', metadata,
-    Column(u'id', TEXT(length=None, convert_unicode=False, assert_unicode=None, unicode_error=None, _warn_on_bytestring=False), primary_key=True, nullable=False),
-    Column(u'generation', INTEGER(), primary_key=False),
-)
-Index('cache_pkey', cache.c.id, unique=True)
 
 
 ticket_custom =  Table('ticket_custom', metadata,
