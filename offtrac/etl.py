@@ -14,16 +14,35 @@ from . import dumptrac
 Base = declarative_base()
 
 
-def path_id(path):
-    return urllib.unquote_plus(os.path.basename(path).rpartition('.')[0])
-
-
 def orm_name(name):
     return ''.join([s.capitalize() for s in name.split('_')])
 
 
 def make_orm_class(table):
     return type(orm_name(table.name), (Base,), {'__table__': table})
+
+
+Ticket = make_orm_class(model.ticket)
+TicketChange = make_orm_class(model.ticket_change)
+Enum = make_orm_class(model.enum)
+Component = make_orm_class(model.component)
+Version = make_orm_class(model.version)
+Milestone = make_orm_class(model.milestone)
+Report = make_orm_class(model.report)
+
+MODEL_CLASSES = (
+    Component,
+    Version,
+    Milestone,
+    Enum,
+    Report,
+    TicketChange,
+    Ticket,
+)
+
+
+def path_id(path):
+    return urllib.unquote_plus(os.path.basename(path).rpartition('.')[0])
 
 
 def get_engine():
@@ -49,35 +68,35 @@ def new_bigtime(isodatetime, old_bigtime=None):
 
 
 class ETL(object):
+    ENUM_TYPES = ('priority', 'resolution', 'severity', 'type')
+
     def __init__(self, filedb, Session):
         self.filedb = filedb
         self.Session = Session
 
-    def reindex(self):
+    def full_reindex(self):
         session = self.Session()
         with session.begin():
+            for Class in MODEL_CLASSES:
+                session.query(Class).delete()
             session.add_all(self.ormify_fields())
             session.add_all(self.ormify_enum())
             session.add_all(self.ormify_ticket())
             session.add_all(self.ormify_report())
             session.add_all(self.ormify_changelog())
 
-
     def ormify_enum(self):
-        Enum = make_orm_class(model.enum)
-        for enum_type in ('priority', 'resolution', 'severity', 'type'):
+        for enum_type in self.ENUM_TYPES:
             for fn, data in self.filedb.iter_jsondir('field/' + enum_type):
                 yield Enum(type=enum_type, name=path_id(fn), value=data)
 
-
     def ormify_fields(self):
-        for table in (model.component, model.version, model.milestone):
-            FieldClass = make_orm_class(table)
+        for FieldClass in (Component, Version, Milestone):
+            table = FieldClass.__table__
             for _fn, data in self.filedb.iter_jsondir('field/' + table.name):
                 yield FieldClass(**data)
 
     def ormify_ticket(self):
-        Ticket = make_orm_class(model.ticket)
         for _fn, data in self.filedb.iter_jsondir('ticket'):
             ticket_id, created, changed, props = data
             props = dict(props,
@@ -87,7 +106,6 @@ class ETL(object):
             yield Ticket(**props)
 
     def ormify_changelog(self):
-        TicketChange = make_orm_class(model.ticket_change)
         for fn, data in self.filedb.iter_jsondir('changelog'):
             bigtime = None
             for isotime, author, field, oldvalue, newvalue, _permanent in data:
@@ -101,7 +119,6 @@ class ETL(object):
                     newvalue=newvalue)
 
     def ormify_report(self):
-        Report = make_orm_class(model.report)
         for fn, props in self.filedb.iter_jsondir('report'):
             yield Report(
                 id=path_id(fn),
@@ -114,7 +131,7 @@ def main():
     filedb = dumptrac.DB()
     filedb.init()
     imp = ETL(filedb, get_session_class(engine=get_engine()))
-    imp.reindex()
+    imp.full_reindex()
 
 
 if __name__ == '__main__':
