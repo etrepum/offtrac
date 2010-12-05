@@ -4,7 +4,7 @@ import re
 import csv
 from cStringIO import StringIO
 
-from .etl import Report
+from .etl import Report, Ticket
 
 from sqlalchemy.exc import ResourceClosedError
 from flask import Flask, jsonify, send_from_directory, abort, request, send_file
@@ -73,6 +73,38 @@ def report_list():
             'user': user,
             'title': 'Available Reports',
         })
+    abort(404)
+
+
+@app.route('/ticket/<int:ticket_id>')
+def ticket(ticket_id):
+    fmt = get_format(request)
+    if fmt == 'html':
+        return send_file(root_path('static', 'index.html'),
+                         mimetype='text/html')
+    user = get_user(request)
+    session = db.session
+    ticket = session.query(Ticket).get(ticket_id)
+    if ticket is None:
+        abort(404)
+    if fmt == 'json':
+        return jsonify({
+            'template': 'ticket',
+            'ticket': orm_dict(ticket),
+            'user': user,
+        })
+    """
+    elif fmt == 'csv':
+        return send_file(csvify(res, dialect='excel'),
+                         mimetype='text/csv',
+                         as_attachment=True,
+                         attachment_filename='ticket_{0}.csv'.format(ticket_id))
+    elif fmt == 'tab':
+        return send_file(csvify(res, dialect='excel-tab'),
+                         mimetype='text/tab-separated-values',
+                         as_attachment=True,
+                         attachment_filename='ticket_{0}.tsv'.format(ticket_id))
+    """
     abort(404)
 
 

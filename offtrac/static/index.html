@@ -3,6 +3,7 @@
     <title>Report loading…</title>
         <link rel="stylesheet" href="/static/trac.css" type="text/css">
         <link rel="stylesheet" href="/static/report.css" type="text/css">
+        <link rel="stylesheet" href="/static/ticket.css" type="text/css">
         <script type="text/javascript" src="/static/jquery.js"></script>
         <script type="text/javascript" src="/static/mustache.js"></script>
         <script type="text/javascript" src="/static/offtrac.js"></script>
@@ -69,23 +70,25 @@
     </div>
     </script>
     <script type="text/x-mustache-template" name="report_list">
-    <h1>Available Reports</h1>
-    <table class="listing reports">
-        <thead>
-            <tr> 
-                <th>Report</th>
-                <th>Title</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{#reports}}
-            <tr>
-                <td class="report"><a title="View report" href="/report/{{id}}">{&#x200b;{{id}}&#x200b;}</a></td> 
-                <td class="title"><a title="View report" href="/report/{{id}}">{{title}}</a></td> 
-            </tr>
-            {{/reports}}
-        </tbody>
-    </table>
+    <div id="content" class="report">
+        <h1>Available Reports</h1>
+        <table class="listing reports">
+            <thead>
+                <tr> 
+                    <th>Report</th>
+                    <th>Title</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#reports}}
+                <tr>
+                    <td class="report"><a title="View report" href="/report/{{id}}">{&#x200b;{{id}}&#x200b;}</a></td> 
+                    <td class="title"><a title="View report" href="/report/{{id}}">{{title}}</a></td> 
+                </tr>
+                {{/reports}}
+            </tbody>
+        </table>
+    </div>
     </script>
     <script type="text/x-mustache-template" name="altlinks">
     <div id="altlinks">
@@ -99,6 +102,79 @@
           <a rel="nofollow" href="/report/{{report_id}}?format=sql">SQL Query</a>
         </li>
       </ul>
+    </div>
+    </script>
+    <script type="text/x-mustache-template" name="ticket">
+    <div id="content" class="ticket">
+    {{#ticket}}
+        <h1 id="trac-ticket-title">
+            <a href="/ticket/{{id}}">Ticket #{{id}}</a>
+            <span class="status">({{status}})</span>
+        </h1>
+        <div id="ticket">
+            <div class="date">
+              <p>Opened {{time_ago}} ago</p>
+              <p>Last modified {{changetime_ago}} ago</p>
+            </div>
+            <h2 class="summary searchable">{{summary}}</h2>
+            <table class="properties">
+                <tbody>
+                    <tr>
+                        <th id="h_reporter">Reported by:</th>
+                        <td headers="h_reporter" class="searchable">
+                            <a href="/query?status=%21closed&reporter={{reporter}}">{{reporter}}</a>
+                        </td>
+                        <th id="h_owner">Owned by:</th>
+                        <td headers="h_owner">
+                            <a href="/query?status=%21closed&owner={{owner}}">{{owner}}</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th id="h_priority">
+                            Priority:
+                        </th>
+                        <td headers="h_priority">
+                            <a href="/query?status=%21closed&priority={{priority}}">{{priority}}</a>
+                        </td>
+                        <th id="h_milestone">
+                            Milestone:
+                        </th>
+                        <td headers="h_milestone">
+                            <a class="milestone" href="/milestone/{{milestone}}">{{milestone}}</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th id="h_component">
+                            Component:
+                        </th>
+                        <td headers="h_component">
+                            <a href="/query?status=%21closed&component={{component}}">{{component}}</a>
+                        </td>
+                        <th id="h_keywords">
+                            Keywords:
+                        </th>
+                        <td headers="h_keywords" class="searchable">{{keywords}}</td>
+                    </tr>
+                    <tr>
+                        <th id="h_cc">
+                            Cc:
+                        </th>
+                        <td headers="h_cc" class="searchable">
+                            <a href="/query?status=%21closed&cc=%7E{{cc}}">{{cc}}</a>
+                        </td>
+                        <th>
+                        </th>
+                        <td>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="description">
+                <h3 id="comment:description">Description</h3>
+                <div class="searchable">{{description}}</div>
+            </div>
+        </div>
+    {{/ticket}}
     </div>
     </script>
 </body></html>

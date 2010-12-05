@@ -52,11 +52,19 @@ $(function () {
         document.title = doc.title + title_postfix;
         $("#content").html(Mustache.to_html(TEMPLATE.report_list, doc));
     }
+    function ticket(doc) {
+        console.log(doc);
+        var t = doc.ticket;
+        document.title = '#' + t.id + ' ' + t.summary + title_postfix;
+        $("#content").html(Mustache.to_html(TEMPLATE.ticket, doc));
+    }
     function loaded(doc) {
         if (doc.template === 'report') {
             report(doc);
         } else if (doc.template === 'report_list') {
             report_list(doc);
+        } else if (doc.template === 'ticket') {
+            ticket(doc);
         }
     }
     function json_url(url) {
