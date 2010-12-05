@@ -4,7 +4,16 @@ $(function () {
         var $o = $(o);
         TEMPLATE[$o.attr("name")] = $o.html();
     });
-    function loaded(doc) {
+    function iso_date(d) {
+        function pad(n) {
+            return ((n < 10) ? '0' + n : n);
+        }
+        return (d.getUTCFullYear() + '-'
+          + pad(d.getUTCMonth() + 1) + '-'
+          + pad(d.getUTCDate()));
+    }
+    var title_postfix = ' MochiMedia [offtrac]';
+    function report(doc) {
         var res = doc.results;
         doc.match_count = res.length;
         doc.groups = [];
@@ -21,16 +30,37 @@ $(function () {
             group.rows.push({
                 'class': 'color' + (r.__color__ || '3') + '-' + ((group.match_count % 2) ? 'odd' : 'even'),
                 'cells': $.map(doc.visible_columns, function (k, i) {
-                    return {'class': k.toLowerCase(), 'value': r[k]};
+                    var v = r[k];
+                    var fv = null;
+                    var cls = k.toLowerCase();
+                    if (cls === 'created' || cls === 'reported' || cls === 'due') {
+                        v = ((v) ? iso_date(new Date(v)) : '');
+                    } else if (cls === 'ticket' || cls === 'summary') {
+                        fv = Mustache.to_html(TEMPLATE.ticket_link,
+                            {'ticket_id': r.ticket, 'value': ((cls === 'ticket') ? '#' : '') + v });
+                    }
+                    return {'class': cls, 'value': v, 'html_value': fv};
                 })
             });
             group.match_count++;
         }
-        document.title = '{' + doc.report_id + '} ' + doc.title;
+        document.title = '{' + doc.report_id + '} ' + doc.title + title_postfix;
         $("#altlinks").html(Mustache.to_html(TEMPLATE.altlinks, doc));
         $("#content").html(Mustache.to_html(TEMPLATE.report, doc));
-
-        console.log(doc);
     }
-    $.getJSON(window.location.href, loaded);
+    function report_list(doc) {
+        document.title = doc.title + title_postfix;
+        $("#content").html(Mustache.to_html(TEMPLATE.report_list, doc));
+    }
+    function loaded(doc) {
+        if (doc.template === 'report') {
+            report(doc);
+        } else if (doc.template === 'report_list') {
+            report_list(doc);
+        }
+    }
+    function json_url(url) {
+        return url + (url.indexOf('?') === -1 ? '?' : '&') + 'format=json';
+    }
+    $.getJSON(json_url(window.location.href), loaded);
 })

@@ -94,6 +94,10 @@ class ETL(object):
         for FieldClass in (Component, Version, Milestone):
             table = FieldClass.__table__
             for _fn, data in self.filedb.iter_jsondir('field/' + table.name):
+                if FieldClass is Milestone:
+                    due = data['due']
+                    data = dict(data,
+                                due=iso8601_to_trac_time(due) if due else due)
                 yield FieldClass(**data)
 
     def ormify_ticket(self):

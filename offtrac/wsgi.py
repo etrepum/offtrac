@@ -36,6 +36,10 @@ def get_format(request):
     return request.args.get('format', 'html')
 
 
+def get_user(request):
+    return request.args.get('USER', 'bob')
+
+
 def csvify(results, dialect):
     sio = StringIO()
     if not results:
@@ -48,19 +52,43 @@ def csvify(results, dialect):
     return sio
 
 
-@app.route('/report/<int:report_id>')
-def report_json(report_id):
+def orm_dict(o):
+    return dict((k, v) for (k, v) in o.__dict__.iteritems()
+                if not k.startswith('_'))
+
+
+@app.route('/report')
+def report_list():
     fmt = get_format(request)
     if fmt == 'html':
         return send_file(root_path('static', 'index.html'),
                          mimetype='text/html')
-    user = request.args.get('USER', 'bob')
+    user = get_user(request)
+    session = db.session
+    reports = session.query(Report).order_by(Report.id).all()
+    if fmt == 'json':
+        return jsonify({
+            'template': 'report_list',
+            'reports': map(orm_dict, reports),
+            'user': user,
+            'title': 'Available Reports',
+        })
+    abort(404)
+
+
+@app.route('/report/<int:report_id>')
+def report(report_id):
+    fmt = get_format(request)
+    if fmt == 'html':
+        return send_file(root_path('static', 'index.html'),
+                         mimetype='text/html')
+    user = get_user(request)
     session = db.session
     report = session.query(Report).get(report_id)
     if report is None:
         abort(404)
     if fmt == 'sql':
-        return send_file(StringIO(report.query),
+        return send_file(StringIO(report.query.encode('utf-8')),
                          mimetype='text/plain',
                          as_attachment=True,
                          attachment_filename='report_{0}.sql'.format(report_id))
@@ -71,6 +99,7 @@ def report_json(report_id):
         res = []
     if fmt == 'json':
         return jsonify({
+            'template': 'report',
             'columns': res[0].keys() if res else [],
             'results': map(dict, res),
             'title': report.title,

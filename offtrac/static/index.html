@@ -38,50 +38,67 @@
           </ul>
         <hr>
       </div>
-      <script type="text/x-mustache-template" name="report">
-      <div id="content" class="report">
-        <h1>{{title}}
-          <span class="numrows">({{match_count}} matches)</span>
-        </h1>
-        {{#groups}}
-        <h2 class="report-result">
-            {{name}}
-            <span class="numrows">
-                ({{match_count}} matches)
-            </span>
-        </h2>
-        <table class="listing tickets">
-          <thead>
-          {{#visible_columns}}
-              <th>{{.}}</th>
-          {{/visible_columns}}
-          </thead>
-          <tbody>
-          {{#rows}}
-              <tr class="{{class}}">{{#cells}}<td class="{{class}}">{{value}}</td>{{/cells}}</tr>
-          {{/rows}}
-          </tbody>
-        </table>
-        {{/groups}}
-      </div>
-      </script>
-      <script type="text/x-mustache-template" name="report_result">
-      </script>
-      <script type="text/x-mustache-template" name="altlinks">
-      <div id="altlinks">
-        <h3>Download in other formats:</h3>
-        <ul>
-          <li class="first">
-            <a rel="nofollow" href="/report/{{report_id}}?format=csv&USER={{user}}">Comma-delimited Text</a>
-          </li><li>
-            <a rel="nofollow" href="/report/{{report_id}}?format=tab&USER={{user}}">Tab-delimited Text</a>
-          </li><li class="last">
-            <a rel="nofollow" href="/report/{{report_id}}?format=sql">SQL Query</a>
-          </li>
-        </ul>
-      </div>
-      </script>
-    <div id="content" class="report"></div>
+    <div id="content">Loading…</div>
     <div id="altlinks"></div>
-  
+    <script type="text/x-mustache-template" name="ticket_link"><a href="/ticket/{{ticket_id}}" title="View ticket">{{value}}</a></script>
+    <script type="text/x-mustache-template" name="report">
+    <div id="content" class="report">
+      <h1>{{title}}
+        <span class="numrows">({{match_count}} matches)</span>
+      </h1>
+      {{#groups}}
+      <h2 class="report-result">
+          {{name}}
+          <span class="numrows">
+              ({{match_count}} matches)
+          </span>
+      </h2>
+      <table class="listing tickets">
+        <thead>
+        {{#visible_columns}}
+            <th>{{.}}</th>
+        {{/visible_columns}}
+        </thead>
+        <tbody>
+        {{#rows}}
+            <tr class="{{class}}">{{#cells}}<td class="{{class}}">{{{html_value}}}{{^html_value}}{{value}}{{/html_value}}</td>{{/cells}}</tr>
+        {{/rows}}
+        </tbody>
+      </table>
+      {{/groups}}
+    </div>
+    </script>
+    <script type="text/x-mustache-template" name="report_list">
+    <h1>Available Reports</h1>
+    <table class="listing reports">
+        <thead>
+            <tr> 
+                <th>Report</th>
+                <th>Title</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#reports}}
+            <tr>
+                <td class="report"><a title="View report" href="/report/{{id}}">{&#x200b;{{id}}&#x200b;}</a></td> 
+                <td class="title"><a title="View report" href="/report/{{id}}">{{title}}</a></td> 
+            </tr>
+            {{/reports}}
+        </tbody>
+    </table>
+    </script>
+    <script type="text/x-mustache-template" name="altlinks">
+    <div id="altlinks">
+      <h3>Download in other formats:</h3>
+      <ul>
+        <li class="first">
+          <a rel="nofollow" href="/report/{{report_id}}?format=csv&USER={{user}}">Comma-delimited Text</a>
+        </li><li>
+          <a rel="nofollow" href="/report/{{report_id}}?format=tab&USER={{user}}">Tab-delimited Text</a>
+        </li><li class="last">
+          <a rel="nofollow" href="/report/{{report_id}}?format=sql">SQL Query</a>
+        </li>
+      </ul>
+    </div>
+    </script>
 </body></html>
