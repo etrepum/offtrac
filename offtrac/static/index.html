@@ -1,0 +1,2466 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>{{title}}</title>
+        <link rel="stylesheet" href="/static/trac.css" type="text/css">
+        <link rel="stylesheet" href="/static/report.css" type="text/css">
+        <script type="text/javascript" src="/static/jquery.js"></script>
+        <script type="text/javascript" src="/static/babel.js"></script>
+        <script type="text/javascript" src="/static/trac.js"></script>
+        <script type="text/javascript" src="/static/search.js"></script>
+  </head>
+  <body>
+    <div id="banner">
+      <div id="header">
+        <a id="logo" href="/"><img src="/static/mochiads_logo.gif" alt="Trac" height="99" width="296"></a>
+      </div>
+      <form id="search" action="/search" method="get">
+        <div>
+          <label for="proj-search">Search:</label>
+          <input type="text" id="proj-search" name="q" size="18" accesskey="f" value="">
+          <input type="submit" value="Search">
+        </div>
+      </form>
+      <div id="metanav" class="nav">
+    <ul>
+      <li class="first">logged in as {{user}}</li><li><a href="/logout">Logout</a></li>
+    </ul>
+  </div>
+    </div>
+    <div id="mainnav" class="nav">
+    <ul>
+      <li><a accesskey="2" href="/timeline">Timeline</a></li><li><a accesskey="3" href="/roadmap">Roadmap</a></li><li class="active"><a href="/report">View Tickets</a></li><li><a accesskey="7" href="/newticket">New Ticket</a></li><li><a accesskey="4" href="/search">Search</a></li>
+    </ul>
+  </div>
+    <div id="main">
+      <div id="ctxtnav" class="nav">
+        <h2>Context Navigation</h2>
+          <ul>
+              <li class="first"><a href="/report">Available Reports</a></li><li class="last"><a href="/query">Custom Query</a></li>
+          </ul>
+        <hr>
+      </div>
+    <div id="content" class="report">
+      <h1>{{title}}
+        <span class="numrows">({{match_count}} matches)</span>
+      </h1>
+      <!--
+      <form method="get" action="">
+        <div id="prefs">
+          <div>
+            <label>
+              Max items per page
+              <input type="text" name="max" size="10" value="0">
+            </label>
+          </div>
+          <div class="buttons">
+            <input type="submit" value="Update">
+          </div>
+        </div>
+      </form>
+      -->
+      <!--
+      <div class="buttons">
+        <form action="" method="get">
+          <div>
+            <input type="hidden" name="action" value="edit">
+            <input type="submit" value="Edit report" accesskey="e">
+          </div>
+        </form>
+        <form action="" method="get">
+          <div>
+            <input type="hidden" name="action" value="copy">
+            <input type="submit" value="Copy report">
+          </div>
+        </form>
+        <form action="" method="get">
+          <div>
+            <input type="hidden" name="action" value="delete">
+            <input type="submit" value="Delete report">
+          </div>
+        </form>
+      </div>
+      -->
+        <h2 class="report-result">
+          Urgent
+          <span class="numrows">
+            (4 matches)
+          </span>
+        </h2>
+        <table class="listing tickets">
+          <thead>
+            <tr>
+              <th>
+                  Ticket
+              </th><th>
+                  Summary
+              </th><th>
+                  Keywords
+              </th><th>
+                  Component
+              </th><th>
+                  Reporter
+              </th><th>
+                  Type
+              </th><th>
+                  Priority
+              </th><th>
+                  Created
+              </th><th colspan="100">
+                  Due
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+              <tr class="color2-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/14155">#14155</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/14155">Jun Bob account</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">unscreened-engineering
+                          </td>
+                          <td class="reporter">minfang
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">High
+                          </td>
+                          <td class="date">07/08/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/14407">#14407</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/14407">unrelated ticket updates ('splatter') when doing git merges</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">mochisvn
+                          </td>
+                          <td class="reporter">nim
+                          </td>
+                          <td class="type">enhancement
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">07/21/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/15494">#15494</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/15494">Migrate mochibot to git</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">git
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">09/30/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/16420">#16420</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/16420">Mochi talk for 2010-12-11 TopGeek salon, 45 minutes</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">research
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">11/14/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+          </tbody>
+        </table>
+        <h2 class="report-result">
+          Review
+          <span class="numrows">
+            (1 match)
+          </span>
+        </h2>
+        <table class="listing tickets">
+          <thead>
+            <tr>
+              <th>
+                  Ticket
+              </th><th>
+                  Summary
+              </th><th>
+                  Keywords
+              </th><th>
+                  Component
+              </th><th>
+                  Reporter
+              </th><th>
+                  Type
+              </th><th>
+                  Priority
+              </th><th>
+                  Created
+              </th><th colspan="100">
+                  Due
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/16127">#16127</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/16127">Documentation for adsim</a>
+                          </td>
+                          <td class="keywords">review
+                          </td>
+                          <td class="component">adsim
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">11/02/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+          </tbody>
+        </table>
+        <h2 class="report-result">
+          Verify
+          <span class="numrows">
+            (3 matches)
+          </span>
+        </h2>
+        <table class="listing tickets">
+          <thead>
+            <tr>
+              <th>
+                  Ticket
+              </th><th>
+                  Summary
+              </th><th>
+                  Keywords
+              </th><th>
+                  Component
+              </th><th>
+                  Reporter
+              </th><th>
+                  Type
+              </th><th>
+                  Priority
+              </th><th>
+                  Created
+              </th><th colspan="100">
+                  Due
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/14940">#14940</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/14940">Erlang common Makefile should have a way to update deps</a>
+                          </td>
+                          <td class="keywords">verify
+                          </td>
+                          <td class="component">mochierl_lib
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">enhancement
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">08/25/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/16283">#16283</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/16283">mochimedia.com accounts for Mochi China operations</a>
+                          </td>
+                          <td class="keywords">verify
+                          </td>
+                          <td class="component">accounts
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">11/08/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/16447">#16447</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/16447">Move the MochiAdsCom.swf and code out of mochiads</a>
+                          </td>
+                          <td class="keywords">verify
+                          </td>
+                          <td class="component">flash-metaservices
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">11/16/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+          </tbody>
+        </table>
+        <h2 class="report-result">
+          Triage Me
+          <span class="numrows">
+            (39 matches)
+          </span>
+        </h2>
+        <table class="listing tickets">
+          <thead>
+            <tr>
+              <th>
+                  Ticket
+              </th><th>
+                  Summary
+              </th><th>
+                  Keywords
+              </th><th>
+                  Component
+              </th><th>
+                  Reporter
+              </th><th>
+                  Type
+              </th><th>
+                  Priority
+              </th><th>
+                  Created
+              </th><th colspan="100">
+                  Due
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+              <tr class="color2-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/14820">#14820</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/14820">Mochi Pub: Add ability to get a feed that is a category &amp; featured</a>
+                          </td>
+                          <td class="keywords">china-offload
+                          </td>
+                          <td class="component">mochiads_pub
+                          </td>
+                          <td class="reporter">ryan
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">High
+                          </td>
+                          <td class="date">08/19/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color3-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/5406">#5406</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/5406">Stats Sharing: Deleted link failover</a>
+                          </td>
+                          <td class="keywords">china-offload
+                          </td>
+                          <td class="component">mochiads_dev
+                          </td>
+                          <td class="reporter">ryan
+                          </td>
+                          <td class="type">enhancement
+                          </td>
+                          <td class="priority">Medium
+                          </td>
+                          <td class="date">09/24/08
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color3-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/6218">#6218</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/6218">Link Tracking default dates are weird on the day you upload the gaem</a>
+                          </td>
+                          <td class="keywords">china-offload
+                          </td>
+                          <td class="component">mochiads_dev
+                          </td>
+                          <td class="reporter">boyd
+                          </td>
+                          <td class="type">broken
+                          </td>
+                          <td class="priority">Medium
+                          </td>
+                          <td class="date">11/16/08
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color3-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/6373">#6373</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/6373">blastfurter should be resilient to unicode characters</a>
+                          </td>
+                          <td class="keywords">china-offload
+                          </td>
+                          <td class="component">blastfurter
+                          </td>
+                          <td class="reporter">ericflo
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Medium
+                          </td>
+                          <td class="date">11/24/08
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color3-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/13101">#13101</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/13101">Upgrade MochiGames to use the newest Riak Python client</a>
+                          </td>
+                          <td class="keywords">china-offload
+                          </td>
+                          <td class="component">mochigames
+                          </td>
+                          <td class="reporter">ericflo
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Medium
+                          </td>
+                          <td class="date">04/29/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color4-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/5149">#5149</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/5149">"Notes for ad approval" feature</a>
+                          </td>
+                          <td class="keywords">china-offload
+                          </td>
+                          <td class="component">mochiads_dev
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">enhancement
+                          </td>
+                          <td class="priority">Low
+                          </td>
+                          <td class="date">09/03/08
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color4-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/5400">#5400</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/5400">Stats sharing should show game/dev info</a>
+                          </td>
+                          <td class="keywords">china-offload
+                          </td>
+                          <td class="component">mochiads_dev
+                          </td>
+                          <td class="reporter">ryan
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Low
+                          </td>
+                          <td class="date">09/24/08
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color4-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/5700">#5700</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/5700">"Approve" button in /admin/game distro approval posts to /admin/feed_game</a>
+                          </td>
+                          <td class="keywords">china-offload
+                          </td>
+                          <td class="component">mochiads_admin
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">enhancement
+                          </td>
+                          <td class="priority">Low
+                          </td>
+                          <td class="date">10/20/08
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color4-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/12472">#12472</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/12472">Add published/distributed status to Game Overview page</a>
+                          </td>
+                          <td class="keywords">china-offload
+                          </td>
+                          <td class="component">mochiads_dev
+                          </td>
+                          <td class="reporter">ada
+                          </td>
+                          <td class="type">enhancement
+                          </td>
+                          <td class="priority">Low
+                          </td>
+                          <td class="date">03/25/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color4-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/13152">#13152</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/13152">Upgrade MochiGames Async to use the open source txriak</a>
+                          </td>
+                          <td class="keywords">china-offload
+                          </td>
+                          <td class="component">mochigames
+                          </td>
+                          <td class="reporter">ericflo
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Low
+                          </td>
+                          <td class="date">05/03/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/6599">#6599</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/6599">eCPM display for publisher tool</a>
+                          </td>
+                          <td class="keywords">china-offload
+                          </td>
+                          <td class="component">mochiads_pub
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">enhancement
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">12/06/08
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/9197">#9197</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/9197">blastfurter.lib.datamart_fetch should use mochiads_lib.http_model for HTTP</a>
+                          </td>
+                          <td class="keywords">china-offload
+                          </td>
+                          <td class="component">blastfurter
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">enhancement
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">06/22/09
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/9215">#9215</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/9215">Admin flag to disable leaderboard flag for a game</a>
+                          </td>
+                          <td class="keywords">china-offload
+                          </td>
+                          <td class="component">mochiads_admin
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">enhancement
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">06/23/09
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/10212">#10212</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/10212">/pub/overview "Why am I not seeing any Stats?" shows up even when there are impressions</a>
+                          </td>
+                          <td class="keywords">china-offload
+                          </td>
+                          <td class="component">mochiads_pub
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">regression
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">09/03/09
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/10319">#10319</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/10319">h.quote_plus can't take unicode URLs, traffic share page unusable if unicode characters in URL</a>
+                          </td>
+                          <td class="keywords">china-offload
+                          </td>
+                          <td class="component">mochiads_accounts
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">regression
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">09/16/09
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/10977">#10977</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/10977">Keep SSN private unless password is given?</a>
+                          </td>
+                          <td class="keywords">china-offload
+                          </td>
+                          <td class="component">mochiads_accounts
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">11/22/09
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/11487">#11487</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/11487">New dev design smushes leaderboard info</a>
+                          </td>
+                          <td class="keywords">china-offload
+                          </td>
+                          <td class="component">unscreened-engineering
+                          </td>
+                          <td class="reporter">jay
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">01/20/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/11714">#11714</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/11714">Obscure SSN visually</a>
+                          </td>
+                          <td class="keywords">china-offload
+                          </td>
+                          <td class="component">mochiads_accounts
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">02/06/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/11715">#11715</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/11715">[User Report] layout issue with scores actionscript code button</a>
+                          </td>
+                          <td class="keywords">china-offload
+                          </td>
+                          <td class="component">mochiads_dev
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">regression
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">02/06/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/14291">#14291</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/14291">Games hosted on mochimedia.com/games using the wrong CDN URL</a>
+                          </td>
+                          <td class="keywords">china-offload
+                          </td>
+                          <td class="component">mochiads_public
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">broken
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">07/14/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/14539">#14539</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/14539">Add VPN docs to doc portal</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">unscreened-engineering
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">08/02/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/15496">#15496</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/15496">opengrok_crawler should reap non-existent repositories</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">opengrok
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">09/30/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/15497">#15497</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/15497">Use sequence diagrams instead of ghetto GraphViz</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">docportal
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">09/30/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/15862">#15862</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/15862">Intermittent failures with trac.mochimedia.net and git.mochimedia.net</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">net-infrastructure
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">10/20/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/15920">#15920</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/15920">Allow showing a specific boardID in leaderboard widget</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">flash-metaservices
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">10/22/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/15925">#15925</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/15925">Use fixed width/height in publisher catalog</a>
+                          </td>
+                          <td class="keywords">china-offload
+                          </td>
+                          <td class="component">mochiads_pub
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">10/23/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/15937">#15937</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/15937">Do a better job extrapolating actionscript_ver in mochiads_erl</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">mochiads_erl
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">10/24/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/15943">#15943</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/15943">Move MochiPass docs to docs/</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">mochipass
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">10/25/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/15970">#15970</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/15970">zh-cn (prod|localdev) https nginx config doesn't do the right thing with support urls</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">nginx
+                          </td>
+                          <td class="reporter">jay
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">10/26/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/16027">#16027</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/16027">Enable gzip for mochimedia.com</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">nginx
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">10/28/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/16031">#16031</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/16031">simplify mochimedia static nginx config</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">nginx
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">10/28/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/16123">#16123</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/16123">add chinese games category  on mochigames.com</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">unscreened-engineering
+                          </td>
+                          <td class="reporter">zhangfu
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">11/01/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/16208">#16208</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/16208">move statsqueries2 to git</a>
+                          </td>
+                          <td class="keywords">china-offload
+                          </td>
+                          <td class="component">analytics
+                          </td>
+                          <td class="reporter">nim
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">11/04/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/16219">#16219</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/16219">Add a mochisvn URL that hudson can curl for deploying a project.</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">mochisvn
+                          </td>
+                          <td class="reporter">dreid
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">11/04/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/16384">#16384</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/16384">Create a tool to do garbage collection of git branches of closed tickets</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">git
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">11/11/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/16443">#16443</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/16443">rebar get-deps can't handle a git URL change</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">open-source
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">11/15/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/16444">#16444</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/16444">Automated dev clobbering</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">git
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">11/15/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/16521">#16521</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/16521">Git pre-receive hook to reject dev with a passion</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">git
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">11/18/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/16620">#16620</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/16620">Direct Git integration for SQLAlchemy Migrate</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">open-source
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">11/25/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+          </tbody>
+        </table>
+        <h2 class="report-result">
+          Cleanup of ancient systems
+          <span class="numrows">
+            (1 match)
+          </span>
+        </h2>
+        <table class="listing tickets">
+          <thead>
+            <tr>
+              <th>
+                  Ticket
+              </th><th>
+                  Summary
+              </th><th>
+                  Keywords
+              </th><th>
+                  Component
+              </th><th>
+                  Reporter
+              </th><th>
+                  Type
+              </th><th>
+                  Priority
+              </th><th>
+                  Created
+              </th><th colspan="100">
+                  Due
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+              <tr class="color4-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/10352">#10352</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/10352">we still need this mysql?</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">mochibot_blog
+                          </td>
+                          <td class="reporter">richard
+                          </td>
+                          <td class="type">enhancement
+                          </td>
+                          <td class="priority">Low
+                          </td>
+                          <td class="date">09/17/09
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+          </tbody>
+        </table>
+        <h2 class="report-result">
+          [CN] documents for mochiads flash
+          <span class="numrows">
+            (2 matches)
+          </span>
+        </h2>
+        <table class="listing tickets">
+          <thead>
+            <tr>
+              <th>
+                  Ticket
+              </th><th>
+                  Summary
+              </th><th>
+                  Keywords
+              </th><th>
+                  Component
+              </th><th>
+                  Reporter
+              </th><th>
+                  Type
+              </th><th>
+                  Priority
+              </th><th>
+                  Created
+              </th><th colspan="100">
+                  Due
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/14518">#14518</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/14518">Make prose docs for mochiads</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">mochiads_erl
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">08/01/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/14811">#14811</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/14811">Check mapping documentation for accuracy</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">mochiads_erl
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">08/18/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+          </tbody>
+        </table>
+        <h2 class="report-result">
+          [CN] Mochi China Ad Server Localization
+          <span class="numrows">
+            (4 matches)
+          </span>
+        </h2>
+        <table class="listing tickets">
+          <thead>
+            <tr>
+              <th>
+                  Ticket
+              </th><th>
+                  Summary
+              </th><th>
+                  Keywords
+              </th><th>
+                  Component
+              </th><th>
+                  Reporter
+              </th><th>
+                  Type
+              </th><th>
+                  Priority
+              </th><th>
+                  Created
+              </th><th colspan="100">
+                  Due
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/14532">#14532</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/14532">CN-&gt;US log shipping (simplesync)</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">ETL
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">08/02/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/14535">#14535</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/14535">WAN protocol for cross-IDC mochiadsdb</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">mochiads-db
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">08/02/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/14633">#14633</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/14633">Prepare overview for Mochi Erlang projects</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">docportal
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">08/09/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/14884">#14884</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/14884">Specification for mochiadsdb WAN protocol</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">mochiads-db
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">08/23/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+          </tbody>
+        </table>
+        <h2 class="report-result">
+          [CN] Mochi China Pylons Localization
+          <span class="numrows">
+            (3 matches)
+          </span>
+        </h2>
+        <table class="listing tickets">
+          <thead>
+            <tr>
+              <th>
+                  Ticket
+              </th><th>
+                  Summary
+              </th><th>
+                  Keywords
+              </th><th>
+                  Component
+              </th><th>
+                  Reporter
+              </th><th>
+                  Type
+              </th><th>
+                  Priority
+              </th><th>
+                  Created
+              </th><th colspan="100">
+                  Due
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/14567">#14567</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/14567">China contest tags don't show up correctly when viewed on English site</a>
+                          </td>
+                          <td class="keywords">china-offload
+                          </td>
+                          <td class="component">mochiads_public
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">broken
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">08/04/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/15751">#15751</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/15751">Enhancements for language filtering</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">mochiads_pub
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">10/17/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/16061">#16061</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/16061">Publisher can not search a game with a Chinese name</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">mochiads_lib
+                          </td>
+                          <td class="reporter">tangyin
+                          </td>
+                          <td class="type">broken
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">10/29/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+          </tbody>
+        </table>
+        <h2 class="report-result">
+          [CN] mochimedia.com front-end phase 3: reliable updates
+          <span class="numrows">
+            (6 matches)
+          </span>
+        </h2>
+        <table class="listing tickets">
+          <thead>
+            <tr>
+              <th>
+                  Ticket
+              </th><th>
+                  Summary
+              </th><th>
+                  Keywords
+              </th><th>
+                  Component
+              </th><th>
+                  Reporter
+              </th><th>
+                  Type
+              </th><th>
+                  Priority
+              </th><th>
+                  Created
+              </th><th colspan="100">
+                  Due
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+              <tr class="color3-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/3894">#3894</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/3894">Make mochisvn more robust with rabbitmq</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">mochisvn
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Medium
+                          </td>
+                          <td class="date">06/01/08
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/10341">#10341</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/10341">mochisvn should retry updateSVN notifications.</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">mochisvn
+                          </td>
+                          <td class="reporter">dreid
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">09/17/09
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/15086">#15086</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/15086">Region aware RabbitMQ support in mochisvn</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">mochisvn
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">09/02/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/15087">#15087</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/15087">Change mochisvn svn commit hook from HTTP to AMQP</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">mochisvn
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">09/02/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/15088">#15088</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/15088">Change mochigithooks hook from HTTP to AMQP</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">mochigithooks
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">09/02/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/15089">#15089</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/15089">Puppetize WAN RabbitMQ + Shovel</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">net-infrastructure
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">09/02/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+          </tbody>
+        </table>
+        <h2 class="report-result">
+          [CN] mochimedia.com front-end phase 4: fast updates
+          <span class="numrows">
+            (5 matches)
+          </span>
+        </h2>
+        <table class="listing tickets">
+          <thead>
+            <tr>
+              <th>
+                  Ticket
+              </th><th>
+                  Summary
+              </th><th>
+                  Keywords
+              </th><th>
+                  Component
+              </th><th>
+                  Reporter
+              </th><th>
+                  Type
+              </th><th>
+                  Priority
+              </th><th>
+                  Created
+              </th><th colspan="100">
+                  Due
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/15090">#15090</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/15090">Set up svn.pvg1 svn mirror</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">net-infrastructure
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">09/02/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/15091">#15091</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/15091">Set up git.pvg1 git mirror</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">git
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">09/02/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/15092">#15092</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/15092">Puppetize checkouts from region-local repos</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">puppet
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">09/02/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/15155">#15155</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/15155">Make mochiads_dev uploads post to US URLs to make it faster</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">mochiads_dev
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">09/06/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/15190">#15190</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/15190">Change redirect system so that we don't redirect zh-cn users to en for static files</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">nginx
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">09/08/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+          </tbody>
+        </table>
+        <h2 class="report-result">
+          MochiGames Backlog
+          <span class="numrows">
+            (3 matches)
+          </span>
+        </h2>
+        <table class="listing tickets">
+          <thead>
+            <tr>
+              <th>
+                  Ticket
+              </th><th>
+                  Summary
+              </th><th>
+                  Keywords
+              </th><th>
+                  Component
+              </th><th>
+                  Reporter
+              </th><th>
+                  Type
+              </th><th>
+                  Priority
+              </th><th>
+                  Created
+              </th><th colspan="100">
+                  Due
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+              <tr class="color3-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/11841">#11841</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/11841">Recently joined sort should show join date</a>
+                          </td>
+                          <td class="keywords">china-offload
+                          </td>
+                          <td class="component">mochigames
+                          </td>
+                          <td class="reporter">ryan
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Medium
+                          </td>
+                          <td class="date">02/18/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color4-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/14128">#14128</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/14128">Putting commas in the "Give Free Coins" admin page somehow blows up</a>
+                          </td>
+                          <td class="keywords">china-offload
+                          </td>
+                          <td class="component">mochigames
+                          </td>
+                          <td class="reporter">ericflo
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Low
+                          </td>
+                          <td class="date">07/07/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color4-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/14785">#14785</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/14785">Make all our templates use 4 space tabs</a>
+                          </td>
+                          <td class="keywords">china-offload
+                          </td>
+                          <td class="component">mochigames
+                          </td>
+                          <td class="reporter">ericflo
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Low
+                          </td>
+                          <td class="date">08/18/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+          </tbody>
+        </table>
+        <h2 class="report-result">
+          Payment Processing Overhaul
+          <span class="numrows">
+            (9 matches)
+          </span>
+        </h2>
+        <table class="listing tickets">
+          <thead>
+            <tr>
+              <th>
+                  Ticket
+              </th><th>
+                  Summary
+              </th><th>
+                  Keywords
+              </th><th>
+                  Component
+              </th><th>
+                  Reporter
+              </th><th>
+                  Type
+              </th><th>
+                  Priority
+              </th><th>
+                  Created
+              </th><th colspan="100">
+                  Due
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+              <tr class="color2-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/13477">#13477</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/13477">Admin report--all developer payments for Mar 2010 and Apr 2010</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">mochiads_admin
+                          </td>
+                          <td class="reporter">minfang
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">High
+                          </td>
+                          <td class="date">05/19/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/12331">#12331</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/12331">Add capability to "delete" a never-going-to-be-reconciled payment attempt from /admin/payments</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">mochiads_admin
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">03/16/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/12583">#12583</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/12583">Add admin-only wire transfer setting to Mochi payment process</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">mochiads_accounts
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">04/01/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/12590">#12590</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/12590">Automatically remove denied payments from payment queue, notify users</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">mochiads_cron
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">04/01/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/12591">#12591</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/12591">Add a "finished with payments for this month" step to payments page</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">mochiads_admin
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">04/01/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/12592">#12592</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/12592">Add country to the bottom of the address field</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">mochiads_accounts
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">04/01/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/12594">#12594</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/12594">Specify how unreconciled payments can be exported to Quickbooks</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">accounting
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">04/01/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/13544">#13544</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/13544">/admin/payments summary should reflect new IIF layout</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">mochiads_admin
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">05/24/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/13562">#13562</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/13562">/admin/payments IIF export should include other files (mass pay, etc.)</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">mochiads_admin
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">05/26/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+          </tbody>
+        </table>
+        <h2 class="report-result">
+          R&amp;D 星期
+          <span class="numrows">
+            (1 match)
+          </span>
+        </h2>
+        <table class="listing tickets">
+          <thead>
+            <tr>
+              <th>
+                  Ticket
+              </th><th>
+                  Summary
+              </th><th>
+                  Keywords
+              </th><th>
+                  Component
+              </th><th>
+                  Reporter
+              </th><th>
+                  Type
+              </th><th>
+                  Priority
+              </th><th>
+                  Created
+              </th><th colspan="100">
+                  Due
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+              <tr class="color2-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/12771">#12771</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/12771">Add better slow request monitoring to mochicom</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">mochicom_erl
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">enhancement
+                          </td>
+                          <td class="priority">High
+                          </td>
+                          <td class="date">04/12/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+          </tbody>
+        </table>
+        <h2 class="report-result">
+          R&amp;D 月
+          <span class="numrows">
+            (3 matches)
+          </span>
+        </h2>
+        <table class="listing tickets">
+          <thead>
+            <tr>
+              <th>
+                  Ticket
+              </th><th>
+                  Summary
+              </th><th>
+                  Keywords
+              </th><th>
+                  Component
+              </th><th>
+                  Reporter
+              </th><th>
+                  Type
+              </th><th>
+                  Priority
+              </th><th>
+                  Created
+              </th><th colspan="100">
+                  Due
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/11505">#11505</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/11505">MochiGames security audit</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">research
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">01/21/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/12063">#12063</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/12063">New /stats reporting metrics</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">mochiads_admin
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">03/01/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+              <tr class="color5-odd">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/15403">#15403</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/15403">Re-evaluate metamochiads caching strategy</a>
+                          </td>
+                          <td class="keywords">
+                          </td>
+                          <td class="component">research
+                          </td>
+                          <td class="reporter">bob
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Undecided
+                          </td>
+                          <td class="date">09/26/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+          </tbody>
+        </table>
+        <h2 class="report-result">
+          Self Serve Triage
+          <span class="numrows">
+            (1 match)
+          </span>
+        </h2>
+        <table class="listing tickets">
+          <thead>
+            <tr>
+              <th>
+                  Ticket
+              </th><th>
+                  Summary
+              </th><th>
+                  Keywords
+              </th><th>
+                  Component
+              </th><th>
+                  Reporter
+              </th><th>
+                  Type
+              </th><th>
+                  Priority
+              </th><th>
+                  Created
+              </th><th colspan="100">
+                  Due
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+              <tr class="color3-even">
+                          <td class="ticket">
+                            <a title="View ticket" href="/ticket/13924">#13924</a>
+                          </td>
+                          <td class="summary">
+                            <a title="View ticket" href="/ticket/13924">Stats not showing up in Chrome with Adblock</a>
+                          </td>
+                          <td class="keywords">china-offload
+                          </td>
+                          <td class="component">mochiads_adv
+                          </td>
+                          <td class="reporter">emad
+                          </td>
+                          <td class="type">task
+                          </td>
+                          <td class="priority">Medium
+                          </td>
+                          <td class="date">06/21/10
+                          </td>
+                          <td class="due">
+                          </td>
+              </tr>
+          </tbody>
+        </table>
+      
+    </div>
+    <div id="altlinks">
+      <h3>Download in other formats:</h3>
+      <ul>
+        <li class="first">
+          <a rel="nofollow" href="/report/{{report_id}}?asc=1&format=rss&USER={{user}}" class="rss">RSS Feed</a>
+        </li><li>
+          <a rel="nofollow" href="/report/{{report_id}}?asc=1&format=csv&USER={{user}}">Comma-delimited Text</a>
+        </li><li>
+          <a rel="nofollow" href="/report/{{report_id}}?asc=1&format=tab&USER={{user}}">Tab-delimited Text</a>
+        </li><li class="last">
+          <a rel="nofollow" href="/report?id=22&format=sql">SQL Query</a>
+        </li>
+      </ul>
+    </div>
+    </div>
+  
+</body></html>
