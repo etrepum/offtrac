@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>{{title}}</title>
+    <title>Report loading…</title>
         <link rel="stylesheet" href="/static/trac.css" type="text/css">
         <link rel="stylesheet" href="/static/report.css" type="text/css">
         <script type="text/javascript" src="/static/jquery.js"></script>
@@ -38,169 +38,50 @@
           </ul>
         <hr>
       </div>
-    <script type="text/x-mustache-template" name="report">
-    <div id="content" class="report">
-      <h1>{{title}}
-        <span class="numrows">({{match_count}} matches)</span>
-      </h1>
-      {{results}}
-    </div>
-    </script>
-    <script type="text/x-mustache-template" name="report_result">
-    <h2 class="report-result">
-        {{name}}
-        <span class="numrows">
-            ({{match_count}} matches)
-        </span>
-    </h2>
-    <table class="listing tickets">
-        <thead>
-            {{heads}}
-        </thead>
-        <tbody>
-            {{rows}}
-        </tbody>
-    </table>
-    </script>
-    <div id="content" class="report">
-      <h1>{{title}}
-        <span class="numrows">({{match_count}} matches)</span>
-      </h1>
-      {{results}}
+      <script type="text/x-mustache-template" name="report">
+      <div id="content" class="report">
+        <h1>{{title}}
+          <span class="numrows">({{match_count}} matches)</span>
+        </h1>
+        {{#groups}}
         <h2 class="report-result">
-          Urgent
-          <span class="numrows">
-            (4 matches)
-          </span>
+            {{name}}
+            <span class="numrows">
+                ({{match_count}} matches)
+            </span>
         </h2>
         <table class="listing tickets">
           <thead>
-            <tr>
-              <th>
-                  Ticket
-              </th><th>
-                  Summary
-              </th><th>
-                  Keywords
-              </th><th>
-                  Component
-              </th><th>
-                  Reporter
-              </th><th>
-                  Type
-              </th><th>
-                  Priority
-              </th><th>
-                  Created
-              </th><th colspan="100">
-                  Due
-              </th>
-            </tr>
+          {{#visible_columns}}
+              <th>{{.}}</th>
+          {{/visible_columns}}
           </thead>
           <tbody>
-              <tr class="color2-even">
-                          <td class="ticket">
-                            <a title="View ticket" href="/ticket/14155">#14155</a>
-                          </td>
-                          <td class="summary">
-                            <a title="View ticket" href="/ticket/14155">Jun Bob account</a>
-                          </td>
-                          <td class="keywords">
-                          </td>
-                          <td class="component">unscreened-engineering
-                          </td>
-                          <td class="reporter">minfang
-                          </td>
-                          <td class="type">task
-                          </td>
-                          <td class="priority">High
-                          </td>
-                          <td class="date">07/08/10
-                          </td>
-                          <td class="due">
-                          </td>
-              </tr>
-              <tr class="color5-odd">
-                          <td class="ticket">
-                            <a title="View ticket" href="/ticket/14407">#14407</a>
-                          </td>
-                          <td class="summary">
-                            <a title="View ticket" href="/ticket/14407">unrelated ticket updates ('splatter') when doing git merges</a>
-                          </td>
-                          <td class="keywords">
-                          </td>
-                          <td class="component">mochisvn
-                          </td>
-                          <td class="reporter">nim
-                          </td>
-                          <td class="type">enhancement
-                          </td>
-                          <td class="priority">Undecided
-                          </td>
-                          <td class="date">07/21/10
-                          </td>
-                          <td class="due">
-                          </td>
-              </tr>
-              <tr class="color5-even">
-                          <td class="ticket">
-                            <a title="View ticket" href="/ticket/15494">#15494</a>
-                          </td>
-                          <td class="summary">
-                            <a title="View ticket" href="/ticket/15494">Migrate mochibot to git</a>
-                          </td>
-                          <td class="keywords">
-                          </td>
-                          <td class="component">git
-                          </td>
-                          <td class="reporter">bob
-                          </td>
-                          <td class="type">task
-                          </td>
-                          <td class="priority">Undecided
-                          </td>
-                          <td class="date">09/30/10
-                          </td>
-                          <td class="due">
-                          </td>
-              </tr>
-              <tr class="color5-odd">
-                          <td class="ticket">
-                            <a title="View ticket" href="/ticket/16420">#16420</a>
-                          </td>
-                          <td class="summary">
-                            <a title="View ticket" href="/ticket/16420">Mochi talk for 2010-12-11 TopGeek salon, 45 minutes</a>
-                          </td>
-                          <td class="keywords">
-                          </td>
-                          <td class="component">research
-                          </td>
-                          <td class="reporter">bob
-                          </td>
-                          <td class="type">task
-                          </td>
-                          <td class="priority">Undecided
-                          </td>
-                          <td class="date">11/14/10
-                          </td>
-                          <td class="due">
-                          </td>
-              </tr>
+          {{#rows}}
+              <tr class="{{class}}">{{#cells}}<td class="{{class}}">{{value}}</td>{{/cells}}</tr>
+          {{/rows}}
           </tbody>
         </table>
-    </div>
-    <div id="altlinks">
-      <h3>Download in other formats:</h3>
-      <ul>
-        <li class="first">
-          <a rel="nofollow" href="/report/{{report_id}}?asc=1&format=csv&USER={{user}}">Comma-delimited Text</a>
-        </li><li>
-          <a rel="nofollow" href="/report/{{report_id}}?asc=1&format=tab&USER={{user}}">Tab-delimited Text</a>
-        </li><li class="last">
-          <a rel="nofollow" href="/report?id=22&format=sql">SQL Query</a>
-        </li>
-      </ul>
-    </div>
-    </div>
+        {{/groups}}
+      </div>
+      </script>
+      <script type="text/x-mustache-template" name="report_result">
+      </script>
+      <script type="text/x-mustache-template" name="altlinks">
+      <div id="altlinks">
+        <h3>Download in other formats:</h3>
+        <ul>
+          <li class="first">
+            <a rel="nofollow" href="/report/{{report_id}}?format=csv&USER={{user}}">Comma-delimited Text</a>
+          </li><li>
+            <a rel="nofollow" href="/report/{{report_id}}?format=tab&USER={{user}}">Tab-delimited Text</a>
+          </li><li class="last">
+            <a rel="nofollow" href="/report/{{report_id}}?format=sql">SQL Query</a>
+          </li>
+        </ul>
+      </div>
+      </script>
+    <div id="content" class="report"></div>
+    <div id="altlinks"></div>
   
 </body></html>

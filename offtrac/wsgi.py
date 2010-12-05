@@ -70,7 +70,13 @@ def report_json(report_id):
     except ResourceClosedError:
         res = []
     if fmt == 'json':
-        return jsonify({'results': map(dict, res)})
+        return jsonify({
+            'columns': res[0].keys() if res else [],
+            'results': map(dict, res),
+            'title': report.title,
+            'user': user,
+            'report_id': report_id,
+        })
     elif fmt == 'csv':
         return send_file(csvify(res, dialect='excel'),
                          mimetype='text/csv',
