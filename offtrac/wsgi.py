@@ -30,6 +30,12 @@ def csv_safe_row(row):
     return [unicode(v).encode('utf-8') for v in row]
 
 
+def get_format(request):
+    if 'application/json' in request.headers.get('Accept', ''):
+        return 'json'
+    return request.args.get('format', 'html')
+
+
 def csvify(results, dialect):
     sio = StringIO()
     if not results:
@@ -44,7 +50,10 @@ def csvify(results, dialect):
 
 @app.route('/report/<int:report_id>')
 def report_json(report_id):
-    fmt = request.args.get('format', 'json')
+    fmt = get_format(request)
+    if fmt == 'html':
+        return send_file(root_path('static', 'index.html'),
+                         mimetype='text/html')
     user = request.args.get('USER', 'bob')
     session = db.session
     report = session.query(Report).get(report_id)
@@ -72,14 +81,12 @@ def report_json(report_id):
                          mimetype='text/tab-separated-values',
                          as_attachment=True,
                          attachment_filename='report_{0}.tsv'.format(report_id))
-    elif fmt == 'html':
-        return send_file(root_path('static', 'index.html'),
-                         mimetype='text/html')
     abort(404)
 
 
-@app.route('/json')
-def json():
+@app.route('/json/<path:blah>')
+def json(blah):
+    print request.headers
     return jsonify({'status': 'ok'})
 
 
