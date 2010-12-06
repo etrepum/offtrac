@@ -4,9 +4,10 @@ import re
 import csv
 from cStringIO import StringIO
 
-from .etl import Report, Ticket, TicketChange
+from .etl import Report, Ticket, TicketChange, Milestone
 
 from sqlalchemy.exc import ResourceClosedError
+from sqlalchemy.sql import func
 from flask import Flask, jsonify, send_from_directory, abort, request, send_file
 from flaskext.sqlalchemy import SQLAlchemy
 
@@ -72,6 +73,30 @@ def report_list():
             'reports': map(orm_dict, reports),
             'user': user,
             'title': 'Available Reports',
+        })
+    abort(404)
+
+
+@app.route('/roadmap')
+def milestone_list():
+    fmt = get_format(request)
+    if fmt == 'html':
+        return send_file(root_path('static', 'index.html'),
+                         mimetype='text/html')
+    user = get_user(request)
+    session = db.session
+    milestones = session.query(Milestone).\
+                 filter(Milestone.completed == 0).\
+                 order_by(Milestone.due == 0,
+                          Milestone.due,
+                          func.UPPER(Milestone.name)).\
+                 all()
+    if fmt == 'json':
+        return jsonify({
+            'template': 'milestone_list',
+            'milestones': map(orm_dict, milestones),
+            'user': user,
+            'title': 'Roadmap',
         })
     abort(404)
 

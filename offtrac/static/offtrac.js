@@ -55,6 +55,10 @@ $(function () {
         document.title = doc.title + title_postfix;
         $("#content").html(Mustache.to_html(TEMPLATE.report_list, doc));
     }
+    function milestone_list(doc) {
+        document.title = doc.title + title_postfix;
+        $("#content").html(Mustache.to_html(TEMPLATE.milestone_list, doc));
+    }
     function ticket(doc) {
         var t = doc.ticket;
         document.title = '#' + t.id + ' ' + t.summary + title_postfix;
@@ -67,6 +71,8 @@ $(function () {
             report(doc);
         } else if (doc.template === 'report_list') {
             report_list(doc);
+        } else if (doc.template === 'milestone_list') {
+            milestone_list(doc);
         } else if (doc.template === 'ticket') {
             ticket(doc);
         }

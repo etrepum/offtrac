@@ -56,6 +56,8 @@ def get_session_class(engine):
 
 
 def iso8601_to_trac_time(isodatetime):
+    if not isodatetime:
+        return isodatetime
     utc_tuple = time.strptime(isodatetime, '%Y-%m-%dT%H:%M:%S')
     return int(calendar.timegm(utc_tuple) * 1000)
 
@@ -95,9 +97,10 @@ class ETL(object):
             table = FieldClass.__table__
             for _fn, data in self.filedb.iter_jsondir('field/' + table.name):
                 if FieldClass is Milestone:
-                    due = data['due']
-                    data = dict(data,
-                                due=iso8601_to_trac_time(due) if due else due)
+                    data = dict(
+                        data,
+                        due=iso8601_to_trac_time(data['due']),
+                        completed=iso8601_to_trac_time(data['completed']))
                 yield FieldClass(**data)
 
     def ormify_ticket(self):
