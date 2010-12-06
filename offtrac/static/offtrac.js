@@ -13,6 +13,9 @@ $(function () {
           + pad(d.getUTCDate()));
     }
     var title_postfix = ' MochiMedia [offtrac]';
+    function wiki_format(text, render) {
+        return "<code>" + render(text).split("\n").join("<br />\n") + "</code>";
+    }
     function report(doc) {
         var res = doc.results;
         doc.match_count = res.length;
@@ -53,9 +56,10 @@ $(function () {
         $("#content").html(Mustache.to_html(TEMPLATE.report_list, doc));
     }
     function ticket(doc) {
-        console.log(doc);
         var t = doc.ticket;
         document.title = '#' + t.id + ' ' + t.summary + title_postfix;
+        doc.wiki_format = function () { return wiki_format };
+        doc.change_format = function () { return wiki_format };
         $("#content").html(Mustache.to_html(TEMPLATE.ticket, doc));
     }
     function loaded(doc) {

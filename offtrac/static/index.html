@@ -171,7 +171,7 @@
             </table>
             <div class="description">
                 <h3 id="comment:description">Description</h3>
-                <div class="searchable">{{description}}</div>
+                <div class="searchable">{{#wiki_format}}{{description}}{{/wiki_format}}</div>
             </div>
         </div>
         <div id="attachments"></div>
@@ -186,7 +186,7 @@
                     Changed {{time_ago}} ago by {{author}}
                 </h3>
                 <div class="comment searchable">
-                    {{newvalue}}
+                    {{#change_format}}{{newvalue}}{{/change_format}}
                 </div>
             </div>
         {{/changes}}
