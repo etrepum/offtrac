@@ -16,6 +16,9 @@ $(function () {
     function wiki_format(text, render) {
         return "<code>" + render(text).split("\n").join("<br />\n") + "</code>";
     }
+    function capitalize(s) {
+        return s.charAt(0).toUpperCase() + s.slice(1);
+    }
     function report(doc) {
         var res = doc.results;
         doc.match_count = res.length;
@@ -24,10 +27,11 @@ $(function () {
             doc.columns,
             function (s, i) { return s.charAt(0) != '_'; });
         var group = null;
+        var prefix = doc.group ? capitalize(doc.group) + ': ' : '';
         for (var i=0; i < res.length; i++) {
             var r = res[i];
-            if (!group || group.name !== r.__group__) {
-                group = {name: r.__group__, rows: [], match_count: 0};
+            if (!group || group.id !== r.__group__) {
+                group = {name: prefix + r.__group__, id: r.__group__, rows: [], match_count: 0};
                 doc.groups.push(group);
             }
             group.rows.push({
@@ -47,7 +51,7 @@ $(function () {
             });
             group.match_count++;
         }
-        document.title = '{' + doc.report_id + '} ' + doc.title + title_postfix;
+        document.title = (doc.report_id ? '{' + doc.report_id + '} ' : '') + doc.title + title_postfix;
         $("#altlinks").html(Mustache.to_html(TEMPLATE.altlinks, doc));
         $("#content").html(Mustache.to_html(TEMPLATE.report, doc));
     }
@@ -60,6 +64,7 @@ $(function () {
         $.each(doc.milestones, function (i, o) {
             o.pct_closed = Math.round((100.0 * o.closed) / o.total);
             o.pct_open = 100 - o.pct_closed;
+            o.qname = encodeURIComponent(o.name).replace(/%20/g, '+');
         });
         $("#content").html(Mustache.to_html(TEMPLATE.milestone_list, doc));
     }

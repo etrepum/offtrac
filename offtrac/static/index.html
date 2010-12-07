@@ -103,16 +103,16 @@
                     <table class="progress">
                         <tbody>
                             <tr>
-                                <td class="closed" style="width: {{pct_closed}}%"><a href="/query?status=closed&group=resolution&milestone={{name}}" title="{{closed}}/{{total}} closed"></a></td>
-                                <td class="open" style="width: {{pct_open}}%"><a href="/query?status=assigned&status=new&status=accepted&status=reopened&group=status&milestone={{name}}" title="{{open}}/{{total}} active"></a></td>
+                                <td class="closed" style="width: {{pct_closed}}%"><a href="/query?status=closed&group=resolution&milestone={{qname}}" title="{{closed}}/{{total}} closed"></a></td>
+                                <td class="open" style="width: {{pct_open}}%"><a href="/query?status=assigned&status=new&status=accepted&status=reopened&group=status&milestone={{qname}}" title="{{open}}/{{total}} active"></a></td>
                         </tbody>
                     </table>
                     <p class="percent">{{pct_closed}}%</p>
                     <dl>
                         <dt>Number of tickets:</dt><dd></dd>
-                        <dt><a href="/query?status=closed&group=resolution&milestone={{name}}">closed:</a></dt><dd><a href="/query?status=closed&group=resolution&milestone={{name}}">{{closed}}</a></dd>
-                        <dt><a href="/query?status=assigned&status=new&status=accepted&status=reopened&group=status&milestone={{name}}">active:</a></dt><dd><a href="/query?status=assigned&status=new&status=accepted&status=reopened&group=status&milestone={{name}}">{{open}}</a></dd>
-                        <dt><a href="/query?group=status&milestone={{name}}">Total:</a></dt><dd><a href="/query?group=status&milestone={{name}}">{{total}}</a></dd>
+                        <dt><a href="/query?status=closed&group=resolution&milestone={{qname}}">closed:</a></dt><dd><a href="/query?status=closed&group=resolution&milestone={{qname}}">{{closed}}</a></dd>
+                        <dt><a href="/query?status=assigned&status=new&status=accepted&status=reopened&group=status&milestone={{qname}}">active:</a></dt><dd><a href="/query?status=assigned&status=new&status=accepted&status=reopened&group=status&milestone={{qname}}">{{open}}</a></dd>
+                        <dt><a href="/query?group=status&milestone={{qname}}">Total:</a></dt><dd><a href="/query?group=status&milestone={{qname}}">{{total}}</a></dd>
                     </dl>
                 </div>
                 <div class="description">{{description}}</div>

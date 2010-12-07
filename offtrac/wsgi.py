@@ -4,16 +4,17 @@ import re
 import csv
 from cStringIO import StringIO
 
-from .etl import Report, Ticket, TicketChange, Milestone
+from .etl import Report, Ticket, TicketChange, Milestone, Enum
 
 from sqlalchemy.exc import ResourceClosedError
 from sqlalchemy.sql import func, case
+from sqlalchemy.sql.expression import and_, desc
 from flask import Flask, jsonify, send_from_directory, abort, request, send_file
 from flaskext.sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///offtrac.db'
-#app.config['SQLALCHEMY_ECHO'] = True
+app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
 
 
@@ -112,6 +113,54 @@ def milestone_list():
     abort(404)
 
 
+def parse_custom_query(session, args, group, order):
+    table = Ticket.__table__
+    cols = table.columns
+    if group not in cols:
+        group = 'status'
+    if order not in cols:
+        order = 'priority'
+    groupcol = cols[group]
+    ordercol = cols[order]
+    preds = [cols[key].in_(values)
+             for (key, values) in args.iterlists()
+             if key in cols]
+    q = session.query(Ticket.id.label('ticket'),
+                      Ticket.summary,
+                      Ticket.owner,
+                      Ticket.type,
+                      Ticket.priority,
+                      Ticket.component,
+                      Ticket.time.label('created'),
+                      Enum.value.label('__color__'),
+                      groupcol.label('__group__')
+                      ).filter(and_(Enum.type == 'priority',
+                                    Ticket.priority == Enum.name,
+                                    *preds))
+    return q.order_by([
+        desc(groupcol) if args.get('groupdesc') == '1' else groupcol,
+        desc(ordercol) if args.get('desc') == '1' else ordercol,
+        ])
+
+
+@app.route('/query')
+def custom_query():
+    fmt = get_format(request)
+    if fmt == 'html':
+        return send_file(root_path('static', 'index.html'),
+                         mimetype='text/html')
+    user = get_user(request)
+    session = db.session
+    group = request.args.get('group', '')
+    order = request.args.get('order', '')
+    q = parse_custom_query(session, request.args, group, order)
+    resultproxy = q.all()
+    return run_report(fmt, user, resultproxy,
+                      order=order,
+                      group=group,
+                      title='Custom Query')
+
+
 @app.route('/ticket/<int:ticket_id>')
 def ticket(ticket_id):
     fmt = get_format(request)
@@ -154,19 +203,25 @@ def report(report_id):
                          as_attachment=True,
                          attachment_filename='report_{0}.sql'.format(report_id))
     resultproxy = session.execute(clean_sql(report.query, user=user))
+    return run_report(fmt, user, resultproxy, report_id=report_id, title=report.title)
+
+
+def run_report(fmt, user, resultproxy, **kw):
     try:
         res = list(resultproxy)
     except ResourceClosedError:
         res = []
+    report_id = kw.get('report_id', 'custom')
     if fmt == 'json':
-        return jsonify({
+        d = kw
+        cols = res[0].keys() if res else []
+        d.update({
             'template': 'report',
-            'columns': res[0].keys() if res else [],
-            'results': map(dict, res),
-            'title': report.title,
+            'columns': cols,
+            'results': [dict(zip(cols, row)) for row in res],
             'user': user,
-            'report_id': report_id,
         })
+        return jsonify(d)
     elif fmt == 'csv':
         return send_file(csvify(res, dialect='excel'),
                          mimetype='text/csv',
