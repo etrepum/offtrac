@@ -7,7 +7,7 @@ from cStringIO import StringIO
 from .etl import Report, Ticket, TicketChange, Milestone
 
 from sqlalchemy.exc import ResourceClosedError
-from sqlalchemy.sql import func
+from sqlalchemy.sql import func, case
 from flask import Flask, jsonify, send_from_directory, abort, request, send_file
 from flaskext.sqlalchemy import SQLAlchemy
 
@@ -53,9 +53,10 @@ def csvify(results, dialect):
     return sio
 
 
-def orm_dict(o):
-    return dict((k, v) for (k, v) in o.__dict__.iteritems()
-                if not k.startswith('_'))
+def orm_dict(o, *args, **kw):
+    return dict(((k, v) for (k, v) in o.__dict__.iteritems()
+                if not k.startswith('_')),
+                *args, **kw)
 
 
 @app.route('/report')
@@ -85,16 +86,26 @@ def milestone_list():
                          mimetype='text/html')
     user = get_user(request)
     session = db.session
-    milestones = session.query(Milestone).\
-                 filter(Milestone.completed == 0).\
-                 order_by(Milestone.due == 0,
-                          Milestone.due,
-                          func.UPPER(Milestone.name)).\
-                 all()
+    q = session.query(
+        Ticket.milestone,
+        func.SUM(1).label("total"),
+        func.SUM(case([(u'closed', 1)], Ticket.status, 0)).label("closed"),
+        func.SUM(case([(u'closed', 0)], Ticket.status, 1)).label("open"),
+    ).group_by(Ticket.milestone).subquery()
+    rows = session.query(Milestone, q.c.total, q.c.closed, q.c.open).\
+           filter(Milestone.completed == 0).\
+           join((q, Milestone.name == q.c.milestone)).\
+           order_by(Milestone.due == 0,
+                    Milestone.due,
+                    func.UPPER(Milestone.name)).\
+           all()
     if fmt == 'json':
         return jsonify({
             'template': 'milestone_list',
-            'milestones': map(orm_dict, milestones),
+            'milestones': [orm_dict(r.Milestone,
+                                    total=r.total,
+                                    closed=r.closed,
+                                    open=r.open) for r in rows],
             'user': user,
             'title': 'Roadmap',
         })

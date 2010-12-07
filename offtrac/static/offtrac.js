@@ -57,6 +57,10 @@ $(function () {
     }
     function milestone_list(doc) {
         document.title = doc.title + title_postfix;
+        $.each(doc.milestones, function (i, o) {
+            o.pct_closed = Math.round((100.0 * o.closed) / o.total);
+            o.pct_open = 100 - o.pct_closed;
+        });
         $("#content").html(Mustache.to_html(TEMPLATE.milestone_list, doc));
     }
     function ticket(doc) {
