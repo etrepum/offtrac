@@ -10,6 +10,7 @@ from __future__ import with_statement
 
 import os
 import glob
+import time
 import urllib
 import getpass
 import httplib
@@ -98,7 +99,7 @@ class Trac(object):
         self.headers = dict([auth_header(user, password)])
         self.conn = None
 
-    def http_request(self, method, path, body=None, headers={}):
+    def http_request(self, method, path, body=None, headers={}, retries=3):
         """Make a HTTP ``method`` request to ``self.url + path``
         with optional body and headers.
 
@@ -114,22 +115,27 @@ class Trac(object):
             }
 
         """
-        (scheme, netloc, path,
-         query, fragment) = urlparse.urlsplit(self.url + path)
-        if query:
-            path = '%s?%s' % (path, query)
-        if self.conn is None:
-            self.conn = get_http_connection(scheme, netloc)
-        self.conn.request(method, path, body, headers)
-        try:
-            response = self.conn.getresponse()
-            body = response.read()
-            headers = response.getheaders()
-        except:
-            self.conn.close()
-            self.conn = None
-            raise
-        return body
+        while True:
+            (scheme, netloc, path,
+             query, fragment) = urlparse.urlsplit(self.url + path)
+            if query:
+                path = '%s?%s' % (path, query)
+            if self.conn is None:
+                self.conn = get_http_connection(scheme, netloc)
+            self.conn.request(method, path, body, headers)
+            try:
+                response = self.conn.getresponse()
+                body = response.read()
+                headers = response.getheaders()
+            except Exception, e:
+                self.conn.close()
+                self.conn = None
+                if retries > 0 and isinstance(e, httplib.BadStatusLine):
+                    retries -= 1
+                    time.sleep(0.01)
+                    continue
+                raise
+            return body
 
     def http_get(self, path):
         res = self.http_request('GET',
