@@ -96,10 +96,14 @@ class ETL(object):
             self.full_reindex()
 
     def incremental_reindex(self, git_head):
-        print 'Starting incremental_reindex({!r})'.format(git_head)
+        changes = list(self.filedb.changed_files(git_head))
+        print 'Starting incremental_reindex from {} with {} changes'.format(
+            git_head[:7], len(changes))
+        if not changes:
+            return
         session = self.Session()
         with session.begin():
-            for modes, fn in self.filedb.changed_files(git_head):
+            for modes, fn in changes:
                 cls = self.lookup_class(fn)
                 if cls is None:
                     continue
