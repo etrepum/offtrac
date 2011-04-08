@@ -1,6 +1,8 @@
 /*
-Somewhat modified version of twitter-text-js, see https://github.com/twitter/twitter-text-js
-
+Unmodified version of twitter-text-js,
+see https://github.com/twitter/twitter-text-js @5c47e44
+*/
+/*
 Copyright 2010 Twitter, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not

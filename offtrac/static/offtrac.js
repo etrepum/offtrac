@@ -37,7 +37,8 @@ $(function () {
     }
     var title_postfix = ' MochiMedia [offtrac]';
     function wiki_format(text, render) {
-        return "<code>" + render(text).split("\n").join("<br />\n") + "</code>";
+        var txt = render(text).split("\n").join("<br />\n");
+        return "<code>" + twttr.txt.autoLinkUrlsCustom(txt) + "</code>";
     }
     function ago_format(text, render) {
         var et = parseFloat(render(text)) - NOW.getTime();
