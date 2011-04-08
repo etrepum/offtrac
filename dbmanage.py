@@ -1,3 +1,4 @@
 #!/usr/bin/env python
 from migrate.versioning.shell import main
-main(url='sqlite:///offtrac.db', debug='False', repository='dbrepo')
+from offtrac.etl import get_engine_url
+main(url=get_engine_url(), debug='False', repository='dbrepo')

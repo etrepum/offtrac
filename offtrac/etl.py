@@ -1,15 +1,14 @@
 import os
 import time
-import urllib
 import calendar
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, and_
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 from . import model
 from . import dumptrac
-
+from .dumptrac import path_id
 
 Base = declarative_base()
 
@@ -29,6 +28,7 @@ Component = make_orm_class(model.component)
 Version = make_orm_class(model.version)
 Milestone = make_orm_class(model.milestone)
 Report = make_orm_class(model.report)
+OfftracMeta = make_orm_class(model.offtrac_meta)
 
 MODEL_CLASSES = (
     Component,
@@ -38,15 +38,22 @@ MODEL_CLASSES = (
     Report,
     TicketChange,
     Ticket,
+    OfftracMeta,
 )
 
+FIELD_CLASSES = (Component, Version, Milestone)
 
-def path_id(path):
-    return urllib.unquote_plus(os.path.basename(path).rpartition('.')[0])
+TABLE_CLASS_MAP = dict((t.__table__.name, t) for t in MODEL_CLASSES)
+
+def get_engine_url(filedb=None):
+    if filedb is None:
+        filedb = dumptrac.DB()
+        filedb.init()
+    return 'sqlite:///{}'.format(filedb.path_join('offtrac.db'))
 
 
-def get_engine():
-    return create_engine('sqlite:///offtrac.db')
+def get_engine(filedb):
+    return create_engine(get_engine_url(filedb))
 
 
 def get_session_class(engine):
@@ -76,7 +83,52 @@ class ETL(object):
         self.filedb = filedb
         self.Session = Session
 
+    def reindex(self):
+        session = self.Session()
+        git_head = None
+        with session.begin():
+            pair = session.query(OfftracMeta).get('git_head')
+            if pair is not None:
+                git_head = pair.value
+        if git_head:
+            self.incremental_reindex(git_head)
+        else:
+            self.full_reindex()
+
+    def incremental_reindex(self, git_head):
+        changes = list(self.filedb.changed_files(git_head))
+        print 'Starting incremental_reindex from {} to {} with {} changes'.format(
+            git_head[:7], self.filedb.git_head[:7], len(changes))
+        if not changes:
+            return
+        session = self.Session()
+        with session.begin():
+            for modes, fn in changes:
+                cls = self.lookup_class(fn)
+                if cls is None:
+                    continue
+                if 'D' in modes:
+                    if cls is Enum:
+                        typ = path_id(os.path.dirname(fn))
+                        name = path_id(fn)
+                        session.query(Enum).filter(and_(
+                            Enum.type == path_id(os.path.dirname(fn)),
+                            Enum.name == path_id(fn))).delete()
+                    else:
+                        pk = list(cls.__table__.primary_key.columns)[0]
+                        session.query(cls).filter(pk == path_id(fn)).delete()
+                else:
+                    lst = self.from_disk(cls, fn)
+                    if 'A' in modes:
+                        session.add_all(lst)
+                    else:
+                        for obj in lst:
+                            session.merge(obj)
+            session.query(OfftracMeta).delete()
+            session.add_all(self.ormify_offtrac_meta())
+
     def full_reindex(self):
+        print 'Starting full_reindex()'
         session = self.Session()
         with session.begin():
             for Class in MODEL_CLASSES:
@@ -86,6 +138,66 @@ class ETL(object):
             session.add_all(self.ormify_ticket())
             session.add_all(self.ormify_report())
             session.add_all(self.ormify_changelog())
+            session.add_all(self.ormify_offtrac_meta())
+
+    def lookup_class(self, fn):
+        parts = fn.split('/')
+        if not (1 < len(parts) < 3):
+            return None
+        first = parts[0]
+        if first == 'field':
+            if parts[1] in self.ENUM_TYPES:
+                return Enum
+            return TABLE_CLASS_MAP.get(parts[1])
+        elif first == 'changelog':
+            return TicketChange
+        return TABLE_CLASS_MAP.get(first)
+
+    def from_disk(self, cls, fn):
+        data = self.filedb.load_json(fn)
+        if cls is Enum:
+            data = dict(
+                type=path_id(os.path.dirname(fn)),
+                name=path_id(fn),
+                value=data)
+        elif cls is Milestone:
+            data = dict(
+                data,
+                due=iso8601_to_trac_time(data['due']),
+                completed=iso8601_to_trac_time(data['completed']))
+        elif cls is Ticket:
+            ticket_id, created, changed, props = data
+            data = dict(props,
+                id=ticket_id,
+                time=iso8601_to_trac_time(created),
+                changetime=iso8601_to_trac_time(changed))
+        elif cls is TicketChange:
+            return self._ticket_changes(path_id(fn), data)
+        elif cls is Report:
+            data = dict(
+                id=path_id(fn),
+                title=data['title'],
+                query=data['sql'],
+                author='',
+                description='')
+        return [cls(**data)]
+
+    def _ticket_changes(self, ticket_id, data):
+        bigtime = None
+        for isotime, author, field, oldvalue, newvalue, _permanent in data:
+            bigtime = new_bigtime(isotime, bigtime)
+            yield TicketChange(
+                ticket=ticket_id,
+                time=bigtime,
+                author=author,
+                field=field,
+                oldvalue=oldvalue,
+                newvalue=newvalue)
+
+    def ormify_offtrac_meta(self):
+        yield OfftracMeta(key='git_head', value=self.filedb.git_head)
+        for k, v in self.filedb.metadata.iteritems():
+            yield OfftracMeta(key=k, value=v)
 
     def ormify_enum(self):
         for enum_type in self.ENUM_TYPES:
@@ -93,7 +205,7 @@ class ETL(object):
                 yield Enum(type=enum_type, name=path_id(fn), value=data)
 
     def ormify_fields(self):
-        for FieldClass in (Component, Version, Milestone):
+        for FieldClass in FIELD_CLASSES:
             table = FieldClass.__table__
             for _fn, data in self.filedb.iter_jsondir('field/' + table.name):
                 if FieldClass is Milestone:
@@ -114,16 +226,8 @@ class ETL(object):
 
     def ormify_changelog(self):
         for fn, data in self.filedb.iter_jsondir('changelog'):
-            bigtime = None
-            for isotime, author, field, oldvalue, newvalue, _permanent in data:
-                bigtime = new_bigtime(isotime, bigtime)
-                yield TicketChange(
-                    ticket=path_id(fn),
-                    time=bigtime,
-                    author=author,
-                    field=field,
-                    oldvalue=oldvalue,
-                    newvalue=newvalue)
+            for obj in self._ticket_changes(path_id(fn), data):
+                yield obj
 
     def ormify_report(self):
         for fn, props in self.filedb.iter_jsondir('report'):
@@ -137,8 +241,10 @@ class ETL(object):
 def main():
     filedb = dumptrac.DB()
     filedb.init()
-    imp = ETL(filedb, get_session_class(engine=get_engine()))
-    imp.full_reindex()
+    engine = get_engine(filedb)
+    # model.metadata.create_all(engine)
+    imp = ETL(filedb, get_session_class(engine=engine))
+    imp.reindex()
 
 
 if __name__ == '__main__':

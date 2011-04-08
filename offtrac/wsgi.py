@@ -4,7 +4,7 @@ import re
 import csv
 from cStringIO import StringIO
 
-from .etl import Report, Ticket, TicketChange, Milestone, Enum
+from .etl import Report, Ticket, TicketChange, Milestone, Enum, get_engine_url
 
 from sqlalchemy.exc import ResourceClosedError
 from sqlalchemy.sql import func, case
@@ -13,7 +13,7 @@ from flask import Flask, jsonify, send_from_directory, abort, request, send_file
 from flaskext.sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///offtrac.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = get_engine_url()
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
 
@@ -59,6 +59,17 @@ def orm_dict(o, *args, **kw):
                 if not k.startswith('_')),
                 *args, **kw)
 
+
+@app.route('/')
+def index():
+    fmt = get_format(request)
+    if fmt == 'html':
+        return send_file(root_path('static', 'index.html'),
+                         mimetype='text/html')
+    user = get_user(request)
+    if fmt == 'json':
+        return jsonify({'template': 'index', 'title': 'OffTrac', user: user})
+    abort(404)
 
 @app.route('/report')
 def report_list():

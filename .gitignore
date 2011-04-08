@@ -1,10 +1,5 @@
 *.pyc
 *.pyo
 .DS_Store
-/ticket
-/changelog
-/field
-/report
-/db.json
-/offtrac.db*
+/db
 /research

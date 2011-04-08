@@ -16,7 +16,7 @@ import getpass
 import httplib
 import urlparse
 import itertools
-import subprocess
+from subprocess import Popen, PIPE
 
 import simplejson as json
 
@@ -32,8 +32,33 @@ FIELDS = (
     'milestone',
 )
 DIRS = ('report', 'ticket', 'changelog') + tuple('field/' + f for f in FIELDS)
-VERSION = 1
+IGNORES = ('*.db',)
+VERSION = 2
 MIN_RECENT = "2000-01-01T00:00:00"
+GIT = 'git'
+DEFAULT_PATH = './db'
+
+
+class ProcessError(Exception):
+    pass
+
+
+class DBError(Exception):
+    pass
+
+
+def call(args, **kw):
+    p = Popen(args, stdout=PIPE, stderr=PIPE, **kw)
+    (stdout, stderr) = p.communicate()
+    return (p.returncode, stdout, stderr)
+
+
+def check_call(args, **kw):
+    (rc, stdout, stderr) = call(args, **kw)
+    if rc:
+        raise ProcessError("{!r} returned {}".format(args, rc))
+    return (rc, stdout, stderr)
+
 
 def get_http_connection(scheme, host):
     """Get a request scoped httplib.HTTPConnection for host
@@ -79,7 +104,7 @@ def write_json(fn, data):
     dirname, basename = os.path.split(fn)
     tmpfn = os.path.join(dirname, '.' + basename)
     with open(tmpfn, 'wb') as f:
-        json.dump(data, f)
+        json.dump(data, f, sort_keys=True, indent=1, separators=(',', ':'))
     os.rename(tmpfn, fn)
 
 
@@ -91,6 +116,20 @@ def ticket_changed(lst):
 def url_safe_id(ident):
     s = unicode(ident)
     return urllib.quote_plus(s.encode('utf8'))
+
+
+def parse_git_status(stdout):
+    results = []
+    for line in stdout.splitlines():
+        if not line.endswith('.json'):
+            continue
+        modes, _, rest = line.partition('\t')
+        results.append((modes, rest))
+    return results
+
+
+def path_id(path):
+    return urllib.unquote_plus(os.path.basename(path).rpartition('.')[0])
 
 
 class Trac(object):
@@ -222,20 +261,67 @@ class Trac(object):
 
 
 class DB(object):
-    def __init__(self, root='.'):
+    def __init__(self, root=DEFAULT_PATH):
         self.root = root
         self.metadata = {}
+        self._git_head = None
 
     def init(self):
-        for dirname in DIRS:
+        for dirname in map(self.path_join, DIRS):
             if not os.path.exists(dirname):
                 os.makedirs(dirname)
+        self.gitinit()
+        self.cleanup()
+        self.gitignore()
         self.read_metadata()
         self.upgrade()
+        self.checkpoint()
+
+    def git(self, *args):
+        return check_call([GIT] + list(args), cwd=self.root)
+
+    def gitinit(self):
+        self.git('init')
+
+    def checkpoint(self):
+        self._git_head = None
+        self.git('add', '-A')
+        # This will fail if there is nothing to commit
+        # TODO: handle this gracefully
+        try:
+            self.git('commit', '-am', '{}'.format(self.recent))
+        except ProcessError:
+            pass
+
+    def cleanup(self):
+        # This will fail if the repo has no commits
+        try:
+            self.git('reset', '--hard', 'HEAD')
+        except ProcessError:
+            pass
+        # Remove unknown files
+        for line in self.git('status', '-s')[2].splitlines():
+            if line.startswith('?? '):
+                os.remove(self.path_join(line[3:]))
+
+    def gitignore(self):
+        fn = self.path_join('.gitignore')
+        ignores = set([ignore + '\n' for ignore in IGNORES])
+        try:
+            with open(fn, 'rb') as f:
+                for l in f:
+                    ignores.discard(l)
+        except IOError:
+            pass
+        if not ignores:
+            return
+        with open(fn, 'ab') as f:
+            for ignore in sorted(ignores):
+                f.write(ignore)
 
     def read_metadata(self):
         try:
-            with open('db.json', 'rb') as f:
+            with open(self.path_join('db.json'), 'rb') as f:
                 self.metadata = json.load(f)
         except IOError:
             pass
@@ -248,29 +334,21 @@ class DB(object):
             dbver = self.metadata.get('version', VERSION)
             if dbver == VERSION:
                 return
-            if dbver == 0:
-                self.upgrade_0_1()
+            elif dbver < 2:
+                raise DBError(
+                    "Version {} no longer supported".format(dbver))
             assert self.metadata['version'] > dbver
             self.write_metadata()
-
-    def upgrade_0_1(self):
-        # First version didn't cache recent or de-jsonclass datetime
-        print 'upgrading version 0 db to version 1'
-        recent = MIN_RECENT
-        for dirname in DIRS:
-            for fn, data in self.iter_jsondir(dirname):
-                data = normalize_in_place(data)
-                if dirname == 'ticket':
-                    recent = max(recent, ticket_changed(data))
-                write_json(fn, data)
-        self.metadata['recent'] = recent
-        self.metadata['version'] = 1
 
     def path_join(self, *args):
         return os.path.join(self.root, *args)
 
-    def json_glob(self, dirname):
-        return glob.glob(self.path_join(dirname, '*.json'))
+    def json_glob(self, *args):
+        return glob.glob(self.path_join(*(args + ('*.json',))))
+
+    def load_json(self, fn):
+        with open(self.path_join(fn), 'rb') as f:
+            return json.load(f)
 
     def iter_jsondir(self, dirname):
         for fn in self.json_glob(dirname):
@@ -284,24 +362,42 @@ class DB(object):
 
     @property
     def recent(self):
-        return self.metadata['recent']
+        return self.metadata.get('recent', MIN_RECENT)
+    
+    @property
+    def git_head(self):
+        if self._git_head is not None:
+            return self._git_head
+        self._git_head = self.git('rev-parse', 'HEAD')[1].rstrip()
+        return self._git_head
+
+    def changed_files(self, ver):
+        return parse_git_status(
+            self.git('diff', '--name-status', '{}...HEAD'.format(ver))[1])
+
+    def nuke(self, *args):
+        for fn in self.json_glob(*args):
+            os.remove(fn)
 
     def pull(self, t):
+        # Reports
         print 'syncing reports'
+        self.nuke('report')
         reports = t.report_list()
         for report_id, info in t.yield_reports(reports):
             safe_id = url_safe_id(report_id)
             write_json(self.path_join('report', '%s.json' % (safe_id,)), info)
+        # Fields
         for field_name in FIELDS:
             print 'syncing', field_name
-            ## TODO: This is a bad sync, we do not
-            ##       garbage collect field values that were deleted
+            self.nuke('field', field_name)
             for field_id, info in t.yield_field(field_name):
                 safe_id = url_safe_id(field_id)
                 write_json(self.path_join('field',
                                           field_name,
                                           '%s.json' % (safe_id,)),
                            info)
+        # Changed tickets
         print 'fetching changed ticket ids since', self.recent
         recent_tickets = t.recent_tickets(self.recent)
         print 'fetching metadata for %d tickets' % (len(recent_tickets),)
@@ -317,16 +413,15 @@ class DB(object):
         self.metadata['recent'] = new_recent
         self.write_metadata()
         print 'synced up to', self.recent
+        self.checkpoint()
 
 
 def keychain_auth(url):
     (_scheme, netloc, _path,
      _query, _fragment) = urlparse.urlsplit(url)
     username = getpass.getuser()
-    (_stdout, stderr) = subprocess.Popen(
-        ["security", "find-internet-password", "-g", "-s", netloc],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE).communicate()
+    (_ret, _stdout, stderr) = call(
+        ["security", "find-internet-password", "-g", "-s", netloc])
     password = stderr.split('"')[1]
     return username, password
 
@@ -334,7 +429,7 @@ def keychain_auth(url):
 def main():
     user, password = keychain_auth(TRAC_URL)
     t = Trac(user, password, TRAC_URL)
-    db = DB('.')
+    db = DB()
     db.init()
     db.pull(t)
 
