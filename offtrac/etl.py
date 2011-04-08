@@ -97,8 +97,8 @@ class ETL(object):
 
     def incremental_reindex(self, git_head):
         changes = list(self.filedb.changed_files(git_head))
-        print 'Starting incremental_reindex from {} with {} changes'.format(
-            git_head[:7], len(changes))
+        print 'Starting incremental_reindex from {} to {} with {} changes'.format(
+            git_head[:7], self.filedb.git_head[:7], len(changes))
         if not changes:
             return
         session = self.Session()
