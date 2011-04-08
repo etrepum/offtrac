@@ -110,6 +110,19 @@ $(function () {
     }
     function ticket(doc) {
         var t = doc.ticket;
+        /*
+        TODO:
+
+            Changes close in time need to be merged.
+            Changes need to be displayed in the trac bullet list:
+             * Cc osakajoe added; cjankos removed
+             * Owner changed from osakajoe to cjankos
+             * Status changed from new to assigned
+
+        NOTE:
+
+            comment oldvalue is the number of the comment
+        */
         document.title = '#' + t.id + ' ' + t.summary + title_postfix;
         $("#content").html(Mustache.to_html(TEMPLATE.ticket, doc));
     }
