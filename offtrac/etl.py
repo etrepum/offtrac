@@ -29,6 +29,7 @@ Component = make_orm_class(model.component)
 Version = make_orm_class(model.version)
 Milestone = make_orm_class(model.milestone)
 Report = make_orm_class(model.report)
+OfftracMeta = make_orm_class(model.offtrac_meta)
 
 MODEL_CLASSES = (
     Component,
@@ -38,6 +39,7 @@ MODEL_CLASSES = (
     Report,
     TicketChange,
     Ticket,
+    OfftracMeta,
 )
 
 
@@ -45,8 +47,9 @@ def path_id(path):
     return urllib.unquote_plus(os.path.basename(path).rpartition('.')[0])
 
 
-def get_engine():
-    return create_engine('sqlite:///offtrac.db')
+def get_engine(filedb):
+    return create_engine(
+        'sqlite:///{}'.format(filedb.path_join('offtrac.db')))
 
 
 def get_session_class(engine):
@@ -77,6 +80,7 @@ class ETL(object):
         self.Session = Session
 
     def full_reindex(self):
+        print 'Starting full_reindex()'
         session = self.Session()
         with session.begin():
             for Class in MODEL_CLASSES:
@@ -86,6 +90,12 @@ class ETL(object):
             session.add_all(self.ormify_ticket())
             session.add_all(self.ormify_report())
             session.add_all(self.ormify_changelog())
+            session.add_all(self.ormify_offtrac_meta())
+
+    def ormify_offtrac_meta(self):
+        yield OfftracMeta(key='git_head', value=self.filedb.git_head)
+        for k, v in self.filedb.metadata.iteritems():
+            yield OfftracMeta(key=k, value=v)
 
     def ormify_enum(self):
         for enum_type in self.ENUM_TYPES:
@@ -137,7 +147,9 @@ class ETL(object):
 def main():
     filedb = dumptrac.DB()
     filedb.init()
-    imp = ETL(filedb, get_session_class(engine=get_engine()))
+    engine = get_engine(filedb)
+    model.metadata.create_all(engine)
+    imp = ETL(filedb, get_session_class(engine=engine))
     imp.full_reindex()
 
 

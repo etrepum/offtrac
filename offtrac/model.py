@@ -5,6 +5,10 @@ BIGINT = INTEGER
 
 metadata = MetaData()
 
+offtrac_meta = Table('offtrac_meta', metadata,
+    Column(u'key', TEXT(), primary_key=True),
+    Column(u'value', TEXT()))
+
 attachment =  Table('attachment', metadata,
     Column(u'type', TEXT(length=None, convert_unicode=False, assert_unicode=None, unicode_error=None, _warn_on_bytestring=False), primary_key=True, nullable=False),
     Column(u'id', TEXT(length=None, convert_unicode=False, assert_unicode=None, unicode_error=None, _warn_on_bytestring=False), primary_key=True, nullable=False),
