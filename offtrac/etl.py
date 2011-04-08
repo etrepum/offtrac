@@ -47,9 +47,15 @@ def path_id(path):
     return urllib.unquote_plus(os.path.basename(path).rpartition('.')[0])
 
 
+def get_engine_url(filedb=None):
+    if filedb is None:
+        filedb = dumptrac.DB()
+        filedb.init()
+    return 'sqlite:///{}'.format(filedb.path_join('offtrac.db'))
+
+
 def get_engine(filedb):
-    return create_engine(
-        'sqlite:///{}'.format(filedb.path_join('offtrac.db')))
+    return create_engine(get_engine_url(filedb))
 
 
 def get_session_class(engine):
@@ -148,7 +154,7 @@ def main():
     filedb = dumptrac.DB()
     filedb.init()
     engine = get_engine(filedb)
-    model.metadata.create_all(engine)
+    # model.metadata.create_all(engine)
     imp = ETL(filedb, get_session_class(engine=engine))
     imp.full_reindex()
 
