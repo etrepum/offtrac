@@ -75,6 +75,10 @@ $(function () {
         doc.change_format = function () { return wiki_format };
         $("#content").html(Mustache.to_html(TEMPLATE.ticket, doc));
     }
+    function index(doc) {
+        document.title = doc.title + title_postfix;
+        $("#content").html(Mustache.to_html(TEMPLATE.index), doc);
+    }
     function loaded(doc) {
         if (doc.template === 'report') {
             report(doc);
@@ -84,6 +88,8 @@ $(function () {
             milestone_list(doc);
         } else if (doc.template === 'ticket') {
             ticket(doc);
+        } else if (doc.template === 'index') {
+            index(doc);
         }
     }
     function json_url(url) {

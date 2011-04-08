@@ -60,6 +60,17 @@ def orm_dict(o, *args, **kw):
                 *args, **kw)
 
 
+@app.route('/')
+def index():
+    fmt = get_format(request)
+    if fmt == 'html':
+        return send_file(root_path('static', 'index.html'),
+                         mimetype='text/html')
+    user = get_user(request)
+    if fmt == 'json':
+        return jsonify({'template': 'index', 'title': 'OffTrac', user: user})
+    abort(404)
+
 @app.route('/report')
 def report_list():
     fmt = get_format(request)
