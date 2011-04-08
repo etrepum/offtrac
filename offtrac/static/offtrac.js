@@ -36,9 +36,22 @@ $(function () {
           + pad(d.getUTCDate()));
     }
     var title_postfix = ' MochiMedia [offtrac]';
+    function link_tickets(text) {
+        var ticketregex = /(^|[^0-9A-Z&\/\?]+)(#)([0-9]+)/gi;
+        var t = twttr.txt;
+        return text.replace(ticketregex, function(match, before, hash, text) {
+            hash = t.htmlEscape(hash);
+            text = t.htmlEscape(text);
+            return (before +
+                '<a href=\"/ticket/' + text + '\">' + hash + text + '</a>');
+        });
+    }
     function wiki_format(text, render) {
+        var t = twttr.txt;
         var txt = render(text).split("\n").join("<br />\n");
-        return "<code>" + twttr.txt.autoLinkUrlsCustom(txt) + "</code>";
+        return ("<code>" + 
+            t.autoLinkUrlsCustom(link_tickets(txt)) +
+            "</code>");
     }
     function ago_format(text, render) {
         var et = parseFloat(render(text)) - NOW.getTime();
