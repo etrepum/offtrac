@@ -68,7 +68,11 @@ def index():
                          mimetype='text/html')
     user = get_user(request)
     if fmt == 'json':
-        return jsonify({'template': 'index', 'title': 'OffTrac', user: user})
+        return jsonify({
+            'template': 'index',
+            'title': 'Index',
+            'user': user,
+        })
     abort(404)
 
 @app.route('/report')

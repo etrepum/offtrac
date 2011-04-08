@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>Report loading…</title>
+    <title>Loading…</title>
         <link rel="stylesheet" href="/static/trac.css" type="text/css">
         <link rel="stylesheet" href="/static/report.css" type="text/css">
         <link rel="stylesheet" href="/static/ticket.css" type="text/css">
@@ -12,7 +12,7 @@
   <body>
     <div id="banner">
       <div id="header">
-        <a id="logo" href="/"><img src="/static/mochiads_logo.gif" alt="Trac" height="99" width="296"></a>
+        <a id="logo" href="/report/22"><img src="/static/mochiads_logo.gif" alt="Trac" height="99" width="296"></a>
       </div>
       <form id="search" action="/search" method="get">
         <div>
@@ -23,7 +23,7 @@
       </form>
       <div id="metanav" class="nav">
     <ul>
-      <li class="first">logged in as {{user}}</li><li><a href="/logout">Logout</a></li>
+      <li class="first">logged in as <span class="username">{{user}}</span></li><li><a href="/logout">Logout</a></li>
     </ul>
   </div>
     </div>
@@ -102,7 +102,7 @@
             <div class="milestone">
                 <div class="info">
                     <h2>Milestone: <em>{{name}}</em></h2>
-                    <p class="date"><strong>time late</strong> ({{due}})</p>
+                    <p class="date">{{{due_ago}}}</p>
                     <table class="progress">
                         <tbody>
                             <tr>
@@ -118,7 +118,7 @@
                         <dt><a href="/query?group=status&milestone={{qname}}">Total:</a></dt><dd><a href="/query?group=status&milestone={{qname}}">{{total}}</a></dd>
                     </dl>
                 </div>
-                <div class="description">{{description}}</div>
+                <div class="description">{{#wiki_format}}{{description}}{{/wiki_format}}</div>
             </div>
             {{/milestones}}
         </div>

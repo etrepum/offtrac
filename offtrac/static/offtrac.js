@@ -1,9 +1,32 @@
 $(function () {
     var TEMPLATE = {};
+    var NOW = new Date();
     $("script[type=text/x-mustache-template]").each(function (idx, o) {
         var $o = $(o);
         TEMPLATE[$o.attr("name")] = $o.html();
     });
+    function date_diff(d1, d0) {
+        return d1.getTime() - d0.getTime();
+    }
+    function elapsed_time(elapsed) {
+        elapsed = Math.abs(elapsed);
+        var TIMEFRAMES = [
+            [(86400 * 365 * 1000), 'years'],
+            [(86400 * 30 * 1000), 'months'],
+            [(86400 * 7 * 1000), 'weeks'],
+            [(86400 * 1000), 'days'],
+            [(3600 * 1000), 'hours'],
+            [(60 * 1000), 'minutes'],
+            [(1 * 1000), 'seconds'],
+        ];
+        var i;
+        for (i = 0; (i < TIMEFRAMES.length - 1) &&
+                (elapsed < (2 * TIMEFRAMES[i][0])); i++) {
+            /* find appropriate unit */
+        }
+        var unit = TIMEFRAMES[i];
+        return Math.floor(elapsed / unit[0]) + ' ' + unit[1];
+    }
     function iso_date(d) {
         function pad(n) {
             return ((n < 10) ? '0' + n : n);
@@ -65,14 +88,25 @@ $(function () {
             o.pct_closed = Math.round((100.0 * o.closed) / o.total);
             o.pct_open = 100 - o.pct_closed;
             o.qname = encodeURIComponent(o.name).replace(/%20/g, '+');
+            if (o.due) {
+                var due = new Date(o.due);
+                o.elapsed = date_diff(due, NOW);
+                var et = elapsed_time(o.elapsed);
+                var dt = '(' + iso_date(due) + ')';
+                if (o.elapsed < 0) {
+                    o.due_ago = '<strong>' + et + ' late </strong> ' + dt;
+                } else {
+                    o.due_ago = 'Due in ' + et + ' ' + dt;
+                }
+            } else {
+                o.due_ago = 'No date set';
+            }
         });
         $("#content").html(Mustache.to_html(TEMPLATE.milestone_list, doc));
     }
     function ticket(doc) {
         var t = doc.ticket;
         document.title = '#' + t.id + ' ' + t.summary + title_postfix;
-        doc.wiki_format = function () { return wiki_format };
-        doc.change_format = function () { return wiki_format };
         $("#content").html(Mustache.to_html(TEMPLATE.ticket, doc));
     }
     function index(doc) {
@@ -80,6 +114,11 @@ $(function () {
         $("#content").html(Mustache.to_html(TEMPLATE.index), doc);
     }
     function loaded(doc) {
+        doc.wiki_format = function () { return wiki_format };
+        doc.change_format = function () { return wiki_format };
+        if (doc.user) {
+            $("span.username").html(doc.user);
+        }
         if (doc.template === 'report') {
             report(doc);
         } else if (doc.template === 'report_list') {
