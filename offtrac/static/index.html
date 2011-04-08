@@ -147,8 +147,8 @@
         </h1>
         <div id="ticket">
             <div class="date">
-              <p>Opened {{time_ago}} ago</p>
-              <p>Last modified {{changetime_ago}} ago</p>
+              <p>Opened {{#ago}}{{time}}{{/ago}}</p>
+              <p>Last modified {{#ago}}{{changetime}}{{/ago}}</p>
             </div>
             <h2 class="summary searchable">{{summary}}</h2>
             <table class="properties">
@@ -216,8 +216,8 @@
         {{#changes}}
             <div class="change" id="trac-change-{{time}}">
                 <h3 class="change">
-                    <span class="threading"><span id="comment:{{time}}" class="cnum">comment:{{time}}</span></span>
-                    Changed {{time_ago}} ago by {{author}}
+                    <span class="threading"><a href="#comment:{{time}}"><span id="comment:{{time}}" class="cnum">comment:{{time}}</span></a></span>
+                    Changed {{#ago}}{{time}}{{/ago}} by {{author}}
                 </h3>
                 <div class="comment searchable">
                     {{#change_format}}{{newvalue}}{{/change_format}}

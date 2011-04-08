@@ -39,6 +39,10 @@ $(function () {
     function wiki_format(text, render) {
         return "<code>" + render(text).split("\n").join("<br />\n") + "</code>";
     }
+    function ago_format(text, render) {
+        var et = parseFloat(render(text)) - NOW.getTime();
+        return elapsed_time(et) + ' ' + ((et < 0) ? 'ago' : 'from now') + ' ';
+    }
     function capitalize(s) {
         return s.charAt(0).toUpperCase() + s.slice(1);
     }
@@ -116,6 +120,7 @@ $(function () {
     function loaded(doc) {
         doc.wiki_format = function () { return wiki_format };
         doc.change_format = function () { return wiki_format };
+        doc.ago = function () { return ago_format; }
         if (doc.user) {
             $("span.username").html(doc.user);
         }
@@ -130,9 +135,17 @@ $(function () {
         } else if (doc.template === 'index') {
             index(doc);
         }
+        if (old_hash) {
+            window.location.hash = old_hash;
+        }
     }
     function json_url(url) {
+        url = url.split('#')[0];
         return url + (url.indexOf('?') === -1 ? '?' : '&') + 'format=json';
+    }
+    var old_hash = window.location.hash;
+    if (old_hash) {
+        window.location.hash = '';
     }
     $.getJSON(json_url(window.location.href), loaded);
 })
