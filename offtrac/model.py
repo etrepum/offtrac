@@ -5,36 +5,31 @@ BIGINT = INTEGER
 
 metadata = MetaData()
 
-def DEFAULT_TEXT():
-    return TEXT(
-        length=None, convert_unicode=False, assert_unicode=None,
-        unicode_error=None, _warn_on_bytestring=False)
-
 offtrac_meta = Table('offtrac_meta', metadata,
     Column(u'key', TEXT(), primary_key=True),
     Column(u'value', TEXT()))
 
 attachment =  Table('attachment', metadata,
-    Column(u'type', DEFAULT_TEXT(), primary_key=True, nullable=False),
-    Column(u'id', DEFAULT_TEXT(), primary_key=True, nullable=False),
-    Column(u'filename', DEFAULT_TEXT(), primary_key=True, nullable=False),
+    Column(u'type', TEXT(), primary_key=True, nullable=False),
+    Column(u'id', TEXT(), primary_key=True, nullable=False),
+    Column(u'filename', TEXT(), primary_key=True, nullable=False),
     Column(u'size', INTEGER()),
     Column(u'time', BIGINT()),
-    Column(u'description', DEFAULT_TEXT()),
-    Column(u'author', DEFAULT_TEXT()),
-    Column(u'ipnr', DEFAULT_TEXT()),
+    Column(u'description', TEXT()),
+    Column(u'author', TEXT()),
+    Column(u'ipnr', TEXT()),
 )
 Index('attachment_pk', attachment.c.type, attachment.c.id, attachment.c.filename, unique=True)
 
 
 wiki =  Table('wiki', metadata,
-    Column(u'name', DEFAULT_TEXT(), primary_key=True, nullable=False),
+    Column(u'name', TEXT(), primary_key=True, nullable=False),
     Column(u'version', INTEGER(), primary_key=True, nullable=False),
     Column(u'time', BIGINT()),
-    Column(u'author', DEFAULT_TEXT()),
-    Column(u'ipnr', DEFAULT_TEXT()),
-    Column(u'text', DEFAULT_TEXT()),
-    Column(u'comment', DEFAULT_TEXT()),
+    Column(u'author', TEXT()),
+    Column(u'ipnr', TEXT()),
+    Column(u'text', TEXT()),
+    Column(u'comment', TEXT()),
     Column(u'readonly', INTEGER()),
 )
 Index(u'wiki_time_idx', wiki.c.time, unique=False)
@@ -42,41 +37,41 @@ Index(u'wiki_time_idx', wiki.c.time, unique=False)
 
 ticket =  Table('ticket', metadata,
     Column(u'id', INTEGER(), primary_key=True, nullable=False),
-    Column(u'type', DEFAULT_TEXT()),
+    Column(u'type', TEXT()),
     Column(u'time', BIGINT()),
     Column(u'changetime', BIGINT()),
-    Column(u'component', DEFAULT_TEXT()),
-    Column(u'severity', DEFAULT_TEXT()),
-    Column(u'priority', DEFAULT_TEXT()),
-    Column(u'owner', DEFAULT_TEXT()),
-    Column(u'reporter', DEFAULT_TEXT()),
-    Column(u'cc', DEFAULT_TEXT()),
-    Column(u'version', DEFAULT_TEXT()),
-    Column(u'milestone', DEFAULT_TEXT()),
-    Column(u'status', DEFAULT_TEXT()),
-    Column(u'resolution', DEFAULT_TEXT()),
-    Column(u'summary', DEFAULT_TEXT()),
-    Column(u'description', DEFAULT_TEXT()),
-    Column(u'keywords', DEFAULT_TEXT()),
+    Column(u'component', TEXT()),
+    Column(u'severity', TEXT()),
+    Column(u'priority', TEXT()),
+    Column(u'owner', TEXT()),
+    Column(u'reporter', TEXT()),
+    Column(u'cc', TEXT()),
+    Column(u'version', TEXT()),
+    Column(u'milestone', TEXT()),
+    Column(u'status', TEXT()),
+    Column(u'resolution', TEXT()),
+    Column(u'summary', TEXT()),
+    Column(u'description', TEXT()),
+    Column(u'keywords', TEXT()),
 )
 Index(u'ticket_time_idx', ticket.c.time, unique=False)
 Index(u'ticket_status_idx', ticket.c.status, unique=False)
 
 
 version =  Table('version', metadata,
-    Column(u'name', DEFAULT_TEXT(), primary_key=True, nullable=False),
+    Column(u'name', TEXT(), primary_key=True, nullable=False),
     Column(u'time', BIGINT()),
-    Column(u'description', DEFAULT_TEXT()),
+    Column(u'description', TEXT()),
 )
 Index('version_pkey', version.c.name, unique=True)
 
 
 report =  Table('report', metadata,
     Column(u'id', INTEGER(), primary_key=True, nullable=False),
-    Column(u'author', DEFAULT_TEXT()),
-    Column(u'title', DEFAULT_TEXT()),
-    Column(u'query', DEFAULT_TEXT()),
-    Column(u'description', DEFAULT_TEXT()),
+    Column(u'author', TEXT()),
+    Column(u'title', TEXT()),
+    Column(u'query', TEXT()),
+    Column(u'description', TEXT()),
 )
 Index('report_pkey', report.c.id, unique=True)
 
@@ -84,10 +79,10 @@ Index('report_pkey', report.c.id, unique=True)
 ticket_change =  Table('ticket_change', metadata,
     Column(u'ticket', INTEGER(), primary_key=True, nullable=False),
     Column(u'time', BIGINT(), primary_key=True, nullable=False),
-    Column(u'author', DEFAULT_TEXT()),
-    Column(u'field', DEFAULT_TEXT(), primary_key=True, nullable=False),
-    Column(u'oldvalue', DEFAULT_TEXT()),
-    Column(u'newvalue', DEFAULT_TEXT()),
+    Column(u'author', TEXT()),
+    Column(u'field', TEXT(), primary_key=True, nullable=False),
+    Column(u'oldvalue', TEXT()),
+    Column(u'newvalue', TEXT()),
 )
 Index(u'ticket_change_ticket_idx', ticket_change.c.ticket, unique=False)
 Index(u'ticket_change_time_idx', ticket_change.c.time, unique=False)
@@ -95,51 +90,51 @@ Index(u'ticket_change_time_idx', ticket_change.c.time, unique=False)
 
 ticket_custom =  Table('ticket_custom', metadata,
     Column(u'ticket', INTEGER(), primary_key=True, nullable=False),
-    Column(u'name', DEFAULT_TEXT(), primary_key=True, nullable=False),
-    Column(u'value', DEFAULT_TEXT()),
+    Column(u'name', TEXT(), primary_key=True, nullable=False),
+    Column(u'value', TEXT()),
 )
 Index('ticket_custom_pk', ticket_custom.c.ticket, ticket_custom.c.name, unique=True)
 
 
 enum =  Table('enum', metadata,
-    Column(u'type', DEFAULT_TEXT(), primary_key=True, nullable=False),
-    Column(u'name', DEFAULT_TEXT(), primary_key=True, nullable=False),
-    Column(u'value', DEFAULT_TEXT()),
+    Column(u'type', TEXT(), primary_key=True, nullable=False),
+    Column(u'name', TEXT(), primary_key=True, nullable=False),
+    Column(u'value', TEXT()),
 )
 Index('enum_pk', enum.c.type, enum.c.name, unique=True)
 
 
 component =  Table('component', metadata,
-    Column(u'name', DEFAULT_TEXT(), primary_key=True, nullable=False),
-    Column(u'owner', DEFAULT_TEXT()),
-    Column(u'description', DEFAULT_TEXT()),
+    Column(u'name', TEXT(), primary_key=True, nullable=False),
+    Column(u'owner', TEXT()),
+    Column(u'description', TEXT()),
 )
 Index('component_pkey', component.c.name, unique=True)
 
 
 repository =  Table('repository', metadata,
     Column(u'id', INTEGER(), primary_key=True, nullable=False),
-    Column(u'name', DEFAULT_TEXT(), primary_key=True, nullable=False),
-    Column(u'value', DEFAULT_TEXT()),
+    Column(u'name', TEXT(), primary_key=True, nullable=False),
+    Column(u'value', TEXT()),
 )
 Index('repository_pk', repository.c.id, repository.c.name, unique=True)
 
 
 milestone =  Table('milestone', metadata,
-    Column(u'name', DEFAULT_TEXT(), primary_key=True, nullable=False),
+    Column(u'name', TEXT(), primary_key=True, nullable=False),
     Column(u'due', BIGINT()),
     Column(u'completed', BIGINT()),
-    Column(u'description', DEFAULT_TEXT()),
+    Column(u'description', TEXT()),
 )
 Index('milestone_pkey', milestone.c.name, unique=True)
 
 
 revision =  Table('revision', metadata,
     Column(u'repos', INTEGER(), primary_key=True, nullable=False),
-    Column(u'rev', DEFAULT_TEXT(), primary_key=True, nullable=False),
+    Column(u'rev', TEXT(), primary_key=True, nullable=False),
     Column(u'time', BIGINT()),
-    Column(u'author', DEFAULT_TEXT()),
-    Column(u'message', DEFAULT_TEXT()),
+    Column(u'author', TEXT()),
+    Column(u'message', TEXT()),
 )
 Index(u'revision_repos_time_idx', revision.c.repos, revision.c.time, unique=False)
 
