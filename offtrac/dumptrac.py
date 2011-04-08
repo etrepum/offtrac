@@ -38,6 +38,7 @@ MIN_RECENT = "2000-01-01T00:00:00"
 GIT = 'git'
 DEFAULT_PATH = './db'
 
+
 class ProcessError(Exception):
     pass
 
@@ -115,6 +116,20 @@ def ticket_changed(lst):
 def url_safe_id(ident):
     s = unicode(ident)
     return urllib.quote_plus(s.encode('utf8'))
+
+
+def parse_git_status(stdout):
+    results = []
+    for line in stdout.splitlines():
+        if not line.endswith('.json'):
+            continue
+        modes, _, rest = line.partition('\t')
+        results.append((modes, rest))
+    return results
+
+
+def path_id(path):
+    return urllib.unquote_plus(os.path.basename(path).rpartition('.')[0])
 
 
 class Trac(object):
@@ -331,6 +346,10 @@ class DB(object):
     def json_glob(self, *args):
         return glob.glob(self.path_join(*(args + ('*.json',))))
 
+    def load_json(self, fn):
+        with open(self.path_join(fn), 'rb') as f:
+            return json.load(f)
+
     def iter_jsondir(self, dirname):
         for fn in self.json_glob(dirname):
             with open(fn, 'rb') as f:
@@ -351,6 +370,10 @@ class DB(object):
             return self._git_head
         self._git_head = self.git('rev-parse', 'HEAD')[1].rstrip()
         return self._git_head
+
+    def changed_files(self, ver):
+        return parse_git_status(
+            self.git('diff', '--name-status', '{}...HEAD'.format(ver))[1])
 
     def nuke(self, *args):
         for fn in self.json_glob(*args):
