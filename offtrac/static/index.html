@@ -214,17 +214,22 @@
             <h2>Change History</h2>
         </div>
         <div id="changelog">
-        {{#changes}}
-            <div class="change" id="trac-change-{{time}}">
+        {{#comments}}
+            <div class="change" id="trac-change-{{cnum}}">
                 <h3 class="change">
-                    <span class="threading"><a href="#comment:{{time}}"><span id="comment:{{time}}" class="cnum">comment:{{time}}</span></a></span>
+                    <span class="threading"><a href="#comment:{{cnum}}"><span id="comment:{{cnum}}" class="cnum">comment:{{cnum}}</span></a></span>
                     Changed {{#ago}}{{time}}{{/ago}} by {{author}}
                 </h3>
+                {{#has_changes}}
+                <ul class="changes">
+                    {{#changed}}<li><strong>{{field_title}}</strong>{{#change_format}}.{{/change_format}}</li>{{/changed}}
+                </ul>
+                {{/has_changes}}
                 <div class="comment searchable">
-                    {{#change_format}}{{newvalue}}{{/change_format}}
+                    {{#wiki_format}}{{comment}}{{/wiki_format}}
                 </div>
             </div>
-        {{/changes}}
+        {{/comments}}
         </div>
     {{/ticket}}
     </div>

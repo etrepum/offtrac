@@ -122,20 +122,96 @@ $(function () {
         });
         $("#content").html(Mustache.to_html(TEMPLATE.milestone_list, doc));
     }
+    function group_comments(changes) {
+        var comments = [];
+        var comment = null;
+        function comment_has_changes() {
+            return this.changed.length;
+        }
+        $.each(changes, function (idx, value) {
+            var ts = 1000 * Math.floor(value.time * 0.001);
+            if (comment === null || ts > comment.time ||
+                    comment.author != value.author) {
+                comment = {
+                    time: ts,
+                    author: value.author,
+                    changed: [],
+                    has_changes: comment_has_changes};
+                comments.push(comment);
+            }
+            if (value.field === 'comment') {
+                comment.cnum = value.oldvalue;
+                comment.comment = value.newvalue;
+            } else {
+                value.field_title = capitalize(value.field);
+                comment.changed.push(value);
+            }
+        });
+        $.each(comments, function (idx, value) {
+            value.changed.sort(function (a, b) { return (b < a) - (a < b); });
+        });
+        return comments;
+    }
+    function list_of(s) {
+        return s.split(/[ \t,]+/);
+    }
+    function list_to_set(lst) {
+        var rval = {};
+        $.each(lst, function (idx, v) { rval[v] = idx; });
+        return rval;
+    }
+    function list_diff(oldvalue, newvalue) {
+        var added = [];
+        var removed = [];
+        var oldlst = list_of(oldvalue);
+        var newlst = list_of(newvalue);
+        var oldset = list_to_set(oldlst);
+        var newset = list_to_set(newlst);
+        return {
+            added: $.grep(newlst, function (elem, idx) {
+                return !(elem in oldset); }),
+            removed: $.grep(oldlst, function (elem, idx) {
+                return !(elem in newset); })};
+    }
+    function change_format(text, render) {
+        if (this.field === 'description') {
+            /* TODO: implement diff here */
+            return ' modified (TODO: diff)';
+        }
+        var t;
+        this.added = '';
+        this.removed = '';
+        if (this.field === 'keywords' || this.field == 'cc') {
+            var diff = list_diff(this.oldvalue, this.newvalue);
+            this.added = diff.added.join(", ");
+            this.removed = diff.removed.join(", ");
+        }
+        if (this.added || this.removed) {
+            var lst = [];
+            if (this.added) {
+                lst.push('<em>{{added}}</em> added');
+            }
+            if (this.removed) {
+                lst.push('<em>{{removed}}</em> removed');
+            }
+            t = lst.join('; ');
+        } else if (this.oldvalue && this.newvalue) {
+            t = 'changed from <em>{{oldvalue}}</em> to <em>{{newvalue}}</em>';
+        } else if (this.oldvalue) {
+            t = '<em>{{oldvalue}}</em> deleted'
+        } else {
+            t = 'set to <em>{{newvalue}}';
+        }
+        return (' ' + render(t) + ' ');
+    }
     function ticket(doc) {
         var t = doc.ticket;
+        t.comments = group_comments(t.changes);
         /*
         TODO:
 
-            Changes close in time need to be merged.
-            Changes need to be displayed in the trac bullet list:
-             * Cc osakajoe added; cjankos removed
-             * Owner changed from osakajoe to cjankos
-             * Status changed from new to assigned
-
-        NOTE:
-
-            comment oldvalue is the number of the comment
+            Changes should be displayed as trac does it
+             * Description diff
         */
         document.title = '#' + t.id + ' ' + t.summary + title_postfix;
         $("#content").html(Mustache.to_html(TEMPLATE.ticket, doc));
@@ -146,7 +222,7 @@ $(function () {
     }
     function loaded(doc) {
         doc.wiki_format = function () { return wiki_format };
-        doc.change_format = function () { return wiki_format };
+        doc.change_format = function () { return change_format };
         doc.ago = function () { return ago_format; }
         if (doc.user) {
             $("span.username").html(doc.user);

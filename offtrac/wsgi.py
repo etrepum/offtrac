@@ -191,7 +191,8 @@ def ticket(ticket_id):
     ticket_dict['changes'] = map(
         orm_dict,
         session.query(TicketChange).filter(
-            TicketChange.ticket == ticket_id).all())
+            TicketChange.ticket == ticket_id).order_by(
+            TicketChange.time).all())
     if fmt == 'json':
         return jsonify({
             'template': 'ticket',
