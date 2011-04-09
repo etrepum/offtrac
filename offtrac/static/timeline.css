@@ -4,7 +4,7 @@
 #prefs fieldset label { display: block }
 #prefs .buttons { margin-top: -1.6em }
 
-h2 {
+.timeline h2 {
  background: #f7f7f7;
  border-bottom: 1px solid #d7d7d7;
  font-size: 105%;
