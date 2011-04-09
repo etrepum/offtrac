@@ -47,6 +47,52 @@
     <h1>The index does not have stuff yet</h1>
     </script>
     <script type="text/x-mustache-template" name="ticket_link"><a href="/ticket/{{ticket_id}}" title="View ticket">{{value}}</a></script>
+    <script type="text/x-mustache-template" name="timeline">
+        <div id="ctxtnav" class="nav">
+            <h2>Context Navigation</h2>
+            <ul>
+                <li class="first"><span>← <a class="prev" href="/timeline?from=2011-03-11&amp;daysback=28&amp;authors=" title="Previous Period">Previous Period</a></span></li><li class="last"><span class="missing">Next Period →</span></li>
+            </ul>
+            <hr />
+        </div>
+        <div id="content" class="timeline">
+            <h1>Timeline</h1>
+            <form id="prefs" method="get" action="">
+                <div><label>View changes from <input type="text" size="10" name="from" value="04/09/11"></label> <br>
+                and <label><input type="text" size="3" name="daysback" value="28"> days back</label><br>
+                <label>done by <input type="text" size="16" name="authors" value=""></label></div>
+                <fieldset>
+                    <label>
+                    <input type="checkbox" name="ticket" checked="checked"> Tickets opened and closed
+                    </label><label>
+                    <input type="checkbox" name="changeset" checked="checked"> Repository changesets
+                    </label><label>
+                    <input type="checkbox" name="milestone" checked="checked"> Milestones reached
+                    </label><label>
+                    <input type="checkbox" name="wiki" checked="checked"> Wiki changes
+                    </label>
+                </fieldset>
+                <div class="buttons">
+                    <input type="submit" name="update" value="Update">
+                </div>
+            </form>
+            {{#days}}
+            <h2>{{date}}: {{today_or_yesterday}}</h2>
+            <dl>
+                {{#changes}}
+                <dt class="{{status_class}}">
+                  <a href="/ticket/{{ticket}}">
+                    <span class="time">{{time_of_day}}</span> Ticket <em title="{{type}}: {{summary}} ({{status_text}})">#{{ticket}}</em> ({{summary}}) {{action}}
+                      by <span class="author">{{author}}</span>
+                  </a>
+                </dt>
+                <dd class="{{status_class}}">
+                    {{#timeline_comment}}.{{/timeline_comment}}
+                </dd>
+                {{/changes}}
+            {{/days}}
+        </div>
+    </script>
     <script type="text/x-mustache-template" name="report">
     <div id="content" class="report">
       <h1>{{title}}

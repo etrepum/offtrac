@@ -251,4 +251,4 @@ $(function () {
         window.location.hash = '';
     }
     $.getJSON(json_url(window.location.href), loaded);
-})
+});
