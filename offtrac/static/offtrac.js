@@ -5,6 +5,13 @@ $(function () {
         var $o = $(o);
         TEMPLATE[$o.attr("name")] = $o.html();
     });
+    function trunc_day(dt) {
+        return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+    }
+    function day_before(dt) {
+        return trunc_day(
+            new Date(trunc_day(dt).getTime() - (3 * 3600 * 1000)));
+    }
     function date_diff(d1, d0) {
         return d1.getTime() - d0.getTime();
     }
@@ -131,11 +138,14 @@ $(function () {
         $.each(changes, function (idx, value) {
             var ts = 1000 * Math.floor(value.time * 0.001);
             if (comment === null || ts > comment.time ||
-                    comment.author != value.author) {
+                    comment.author !== value.author ||
+                    comment.ticket !== value.ticket) {
                 comment = {
                     time: ts,
                     author: value.author,
                     changed: [],
+                    ticket: value.ticket,
+                    date: iso_date(new Date(ts)),
                     has_changes: comment_has_changes};
                 comments.push(comment);
             }
@@ -216,9 +226,40 @@ $(function () {
         document.title = '#' + t.id + ' ' + t.summary + title_postfix;
         $("#content").html(Mustache.to_html(TEMPLATE.ticket, doc));
     }
+    function timeline_day_groups(comments, tickets) {
+        var days = [];
+        var day = null;
+        var today = iso_date(trunc_day(NOW));
+        var yesterday = iso_date(day_before(NOW));
+        for (var i = comments.length - 1; i >= 0; i--) {
+            var o = comments[i];
+            o.t = tickets[o.ticket];
+            o.status_class = 'newticket';
+            o.summary = o.t.summary;
+            if (day === null || o.date !== day.date) {
+                day = {date: o.date, day_changes: []};
+                if (o.date === today) {
+                    day.today_or_yesterday = 'Today';
+                } else if (o.date === yesterday) {
+                    day.today_or_yesterday = 'Yesterday';
+                }
+                days.push(day);
+            }
+            day.day_changes.push(o);
+        }
+        return days;
+    }
+    function timeline(doc) {
+        var tickets = doc.tickets;
+        var comments = group_comments(doc.changes);
+        doc.days = timeline_day_groups(comments, tickets);
+        document.title = doc.title + title_postfix;
+        console.log(doc);
+        $("#content").html(Mustache.to_html(TEMPLATE.timeline, doc));
+    }
     function index(doc) {
         document.title = doc.title + title_postfix;
-        $("#content").html(Mustache.to_html(TEMPLATE.index), doc);
+        $("#content").html(Mustache.to_html(TEMPLATE.index, doc));
     }
     function loaded(doc) {
         doc.wiki_format = function () { return wiki_format };
@@ -237,6 +278,8 @@ $(function () {
             ticket(doc);
         } else if (doc.template === 'index') {
             index(doc);
+        } else if (doc.template === 'timeline') {
+            timeline(doc);
         }
         if (old_hash) {
             window.location.hash = old_hash;

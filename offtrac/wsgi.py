@@ -2,6 +2,8 @@
 import os
 import re
 import csv
+import time
+import datetime
 from cStringIO import StringIO
 
 from .etl import Report, Ticket, TicketChange, Milestone, Enum, get_engine_url
@@ -16,6 +18,10 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = get_engine_url()
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
+
+
+def msec(dt):
+    return int(1000 * time.mktime(dt.timetuple()))
 
 
 def root_path(*args):
@@ -175,6 +181,42 @@ def custom_query():
                       group=group,
                       title='Custom Query')
 
+
+@app.route('/timeline')
+def timeline():
+    fmt = get_format(request)
+    if fmt == 'html':
+        return send_file(root_path('static', 'index.html'),
+                         mimetype='text/html')
+    today = datetime.date.today()
+    user = get_user(request)
+    session = db.session
+    daysback = 14
+    changes = map(orm_dict,
+        session.query(TicketChange).filter(
+            TicketChange.time >= msec(today - datetime.timedelta(days=daysback))
+        ).order_by(TicketChange.time))
+    # sqlite3 has a limit to the number of variables in a query
+    # http://www.sqlite.org/limits.html
+    i = 0
+    chunk_size = 500
+    ticket_ids = sorted(set(c['ticket'] for c in changes))
+    tickets = {}
+    while i < len(ticket_ids):
+        tickets.update(
+            (ticket.id, orm_dict(ticket))
+            for ticket in session.query(Ticket).filter(
+                Ticket.id.in_(ticket_ids[i:i+chunk_size])))
+        i += chunk_size
+    if fmt == 'json':
+        return jsonify({
+            'template': 'timeline',
+            'tickets': tickets,
+            'changes': changes,
+            'title': 'Timeline',
+            'user': user,
+        })
+    abort(404)
 
 @app.route('/ticket/<int:ticket_id>')
 def ticket(ticket_id):

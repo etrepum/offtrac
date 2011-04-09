@@ -5,6 +5,7 @@
         <link rel="stylesheet" href="/static/report.css" type="text/css">
         <link rel="stylesheet" href="/static/ticket.css" type="text/css">
         <link rel="stylesheet" href="/static/roadmap.css" type="text/css">
+        <link rel="stylesheet" href="/static/timeline.css" type="text/css">
         <script type="text/javascript" src="/static/jquery.js"></script>
         <script type="text/javascript" src="/static/mustache.js"></script>
         <script type="text/javascript" src="/static/twitter-text.js"></script>
@@ -57,29 +58,10 @@
         </div>
         <div id="content" class="timeline">
             <h1>Timeline</h1>
-            <form id="prefs" method="get" action="">
-                <div><label>View changes from <input type="text" size="10" name="from" value="04/09/11"></label> <br>
-                and <label><input type="text" size="3" name="daysback" value="28"> days back</label><br>
-                <label>done by <input type="text" size="16" name="authors" value=""></label></div>
-                <fieldset>
-                    <label>
-                    <input type="checkbox" name="ticket" checked="checked"> Tickets opened and closed
-                    </label><label>
-                    <input type="checkbox" name="changeset" checked="checked"> Repository changesets
-                    </label><label>
-                    <input type="checkbox" name="milestone" checked="checked"> Milestones reached
-                    </label><label>
-                    <input type="checkbox" name="wiki" checked="checked"> Wiki changes
-                    </label>
-                </fieldset>
-                <div class="buttons">
-                    <input type="submit" name="update" value="Update">
-                </div>
-            </form>
             {{#days}}
             <h2>{{date}}: {{today_or_yesterday}}</h2>
             <dl>
-                {{#changes}}
+                {{#day_changes}}
                 <dt class="{{status_class}}">
                   <a href="/ticket/{{ticket}}">
                     <span class="time">{{time_of_day}}</span> Ticket <em title="{{type}}: {{summary}} ({{status_text}})">#{{ticket}}</em> ({{summary}}) {{action}}
@@ -87,9 +69,9 @@
                   </a>
                 </dt>
                 <dd class="{{status_class}}">
-                    {{#timeline_comment}}.{{/timeline_comment}}
+                    {{#wiki_format}}{{comment}}{{/wiki_format}}
                 </dd>
-                {{/changes}}
+                {{/day_changes}}
             {{/days}}
         </div>
     </script>
