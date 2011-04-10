@@ -70,7 +70,7 @@ attachments are not currently synchronized.
       }
 
 * ``db/ticket/{{id}}.json`` - Ticket data in the form of
-    ``[ticket_id, created, changed, props]``::
+  ``[ticket_id, created, changed, props]``::
 
       [
        1,
