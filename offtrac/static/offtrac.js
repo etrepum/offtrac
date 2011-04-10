@@ -84,7 +84,6 @@ $(function () {
         });
     }
     function wiki_format(text, render) {
-        var t = twttr.txt;
         var txt = render(text).split("\n").join("<br />\n");
         var d = document.createElement('div');
         CREOLE.parse(d, render(text));
