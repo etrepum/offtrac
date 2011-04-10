@@ -210,7 +210,7 @@ $(function () {
         } else if (this.oldvalue) {
             t = '<em>{{oldvalue}}</em> deleted'
         } else {
-            t = 'set to <em>{{newvalue}}';
+            t = 'set to <em>{{newvalue}}</em>';
         }
         return (' ' + render(t) + ' ');
     }
