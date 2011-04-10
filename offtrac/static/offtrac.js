@@ -1,10 +1,24 @@
 $(function () {
     var TEMPLATE = {};
     var NOW = new Date();
+    var CREOLE = new Parse.Simple.Creole({});
     $("script[type=text/x-mustache-template]").each(function (idx, o) {
         var $o = $(o);
         TEMPLATE[$o.attr("name")] = $o.html();
     });
+
+    var HTML_ENTITIES = {
+      '&': '&amp;',
+      '>': '&gt;',
+      '<': '&lt;',
+      '"': '&quot;',
+      "'": '&#32;'
+    };
+    function html_escape(text) {
+        return text && text.replace(/[&"'><]/g, function (character) {
+            return HTML_ENTITIES[character];
+        });
+    }
     function trunc_day(dt) {
         return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
     }
@@ -42,13 +56,30 @@ $(function () {
           + pad(d.getUTCMonth() + 1) + '-'
           + pad(d.getUTCDate()));
     }
+    function parse_search_query(s) {
+        var terms = [];
+        var re = /(?:((?:".*?")|(?:'.*?'))|([^\s]+))(?:\s*)/g;
+        var match = null;
+        while ((match = re.exec(s)) !== null) {
+            var quoted = match[1];
+            if (quoted) {
+                terms.push(quoted.substring(1, quoted.length - 1))
+            } else {
+                terms.push(match[2]);
+            }
+        }
+        return terms;
+    }
     var title_postfix = ' MochiMedia [offtrac]';
     function link_tickets(text) {
-        var ticketregex = /(^|[^0-9A-Z&\/\?]+)(#)([0-9]+)/gi;
+        var ticketregex = /(^|[^0-9A-Z&\/\?!]+)(!?#)([0-9]+)/gi;
         var t = twttr.txt;
         return text.replace(ticketregex, function(match, before, hash, text) {
-            hash = t.htmlEscape(hash);
-            text = t.htmlEscape(text);
+            if (hash.charAt(0) === '!') {
+                return before + '#' + hash + text;
+            }
+            hash = html_escape(hash);
+            text = html_escape(text);
             return (before +
                 '<a href=\"/ticket/' + text + '\">' + hash + text + '</a>');
         });
@@ -56,9 +87,9 @@ $(function () {
     function wiki_format(text, render) {
         var t = twttr.txt;
         var txt = render(text).split("\n").join("<br />\n");
-        return ("<code>" + 
-            t.autoLinkUrlsCustom(link_tickets(txt)) +
-            "</code>");
+        var d = document.createElement('div');
+        CREOLE.parse(d, render(text));
+        return link_tickets(d.innerHTML);
     }
     function ago_format(text, render) {
         var et = parseFloat(render(text)) - NOW.getTime();
@@ -280,7 +311,9 @@ $(function () {
             index(doc);
         } else if (doc.template === 'timeline') {
             timeline(doc);
-        }
+        }/* else if (doc.template === 'search') {
+            trac_search(doc);
+        }*/
         if (old_hash) {
             window.location.hash = old_hash;
         }
