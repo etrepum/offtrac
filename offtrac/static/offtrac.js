@@ -73,7 +73,6 @@ $(function () {
     var title_postfix = ' MochiMedia [offtrac]';
     function link_tickets(text) {
         var ticketregex = /(^|[^0-9A-Z&\/\?!]+)(!?#)([0-9]+)/gi;
-        var t = twttr.txt;
         return text.replace(ticketregex, function(match, before, hash, text) {
             if (hash.charAt(0) === '!') {
                 return before + '#' + hash + text;
