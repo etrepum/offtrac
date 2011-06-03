@@ -4,6 +4,8 @@ import re
 import csv
 import time
 import datetime
+from operator import itemgetter
+from itertools import imap
 from cStringIO import StringIO
 
 from .etl import Report, Ticket, TicketChange, Milestone, Enum, get_engine_url
@@ -18,6 +20,26 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = get_engine_url()
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
+
+
+def get_closed_tickets(session):
+    q = session.query(Ticket.id
+        ).filter(Ticket.status == 'closed'
+        ).order_by(Ticket.id
+        ).all()
+    return list(range_span(imap(itemgetter(0), q)))
+
+
+def range_span(vals):
+    ivals = iter(vals)
+    start = end = next(ivals)
+    for v in ivals:
+        if v == end + 1:
+            end = v
+        else:
+            yield (start, end - start)
+            start = end = v
+    yield (start, end - start)
 
 
 def msec(dt):
@@ -80,6 +102,7 @@ def index():
             'user': user,
         })
     abort(404)
+
 
 @app.route('/report')
 def report_list():
@@ -242,6 +265,14 @@ def ticket(ticket_id):
             'user': user,
         })
     abort(404)
+
+
+@app.route('/closed_tickets')
+def closed_tickets():
+    fmt = get_format(request)
+    if fmt != 'json':
+        abort(404)
+    return jsonify({'closed_tickets': get_closed_tickets(db.session)})
 
 
 @app.route('/report/<int:report_id>')

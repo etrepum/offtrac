@@ -14,21 +14,26 @@ $(function () {
       '"': '&quot;',
       "'": '&#32;'
     };
+
     function html_escape(text) {
         return text && text.replace(/[&"'><]/g, function (character) {
             return HTML_ENTITIES[character];
         });
     }
+
     function trunc_day(dt) {
         return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
     }
+
     function day_before(dt) {
         return trunc_day(
             new Date(trunc_day(dt).getTime() - (3 * 3600 * 1000)));
     }
+
     function date_diff(d1, d0) {
         return d1.getTime() - d0.getTime();
     }
+
     function elapsed_time(elapsed) {
         elapsed = Math.abs(elapsed);
         var TIMEFRAMES = [
@@ -48,6 +53,7 @@ $(function () {
         var unit = TIMEFRAMES[i];
         return Math.floor(elapsed / unit[0]) + ' ' + unit[1];
     }
+
     function iso_date(d) {
         function pad(n) {
             return ((n < 10) ? '0' + n : n);
@@ -56,6 +62,7 @@ $(function () {
           + pad(d.getUTCMonth() + 1) + '-'
           + pad(d.getUTCDate()));
     }
+
     function parse_search_query(s) {
         var terms = [];
         var re = /(?:((?:".*?")|(?:'.*?'))|([^\s]+))(?:\s*)/g;
@@ -70,6 +77,7 @@ $(function () {
         }
         return terms;
     }
+
     var title_postfix = ' MochiMedia [offtrac]';
     function link_tickets(text) {
         var ticketregex = /(^|[^0-9A-Z&\/\?!]+)(!?#)([0-9]+)/gi;
@@ -83,19 +91,23 @@ $(function () {
                 '<a href=\"/ticket/' + text + '\">' + hash + text + '</a>');
         });
     }
+
     function wiki_format(text, render) {
         var txt = render(text).split("\n").join("<br />\n");
         var d = document.createElement('div');
         CREOLE.parse(d, render(text));
         return link_tickets(d.innerHTML);
     }
+
     function ago_format(text, render) {
         var et = parseFloat(render(text)) - NOW.getTime();
         return elapsed_time(et) + ' ' + ((et < 0) ? 'ago' : 'from now') + ' ';
     }
+
     function capitalize(s) {
         return s.charAt(0).toUpperCase() + s.slice(1);
     }
+
     function report(doc) {
         var res = doc.results;
         doc.match_count = res.length;
@@ -132,10 +144,12 @@ $(function () {
         $("#altlinks").html(Mustache.to_html(TEMPLATE.altlinks, doc));
         $("#content").html(Mustache.to_html(TEMPLATE.report, doc));
     }
+
     function report_list(doc) {
         document.title = doc.title + title_postfix;
         $("#content").html(Mustache.to_html(TEMPLATE.report_list, doc));
     }
+
     function milestone_list(doc) {
         document.title = doc.title + title_postfix;
         $.each(doc.milestones, function (i, o) {
@@ -158,6 +172,7 @@ $(function () {
         });
         $("#content").html(Mustache.to_html(TEMPLATE.milestone_list, doc));
     }
+
     function group_comments(changes) {
         var comments = [];
         var comment = null;
@@ -191,14 +206,17 @@ $(function () {
         });
         return comments;
     }
+
     function list_of(s) {
         return s.split(/[ \t,]+/);
     }
+
     function list_to_set(lst) {
         var rval = {};
         $.each(lst, function (idx, v) { rval[v] = idx; });
         return rval;
     }
+
     function list_diff(oldvalue, newvalue) {
         var added = [];
         var removed = [];
@@ -212,6 +230,7 @@ $(function () {
             removed: $.grep(oldlst, function (elem, idx) {
                 return !(elem in newset); })};
     }
+
     function change_format(text, render) {
         if (this.field === 'description') {
             /* TODO: implement diff here */
@@ -243,6 +262,7 @@ $(function () {
         }
         return (' ' + render(t) + ' ');
     }
+
     function ticket(doc) {
         var t = doc.ticket;
         t.comments = group_comments(t.changes);
@@ -255,6 +275,7 @@ $(function () {
         document.title = '#' + t.id + ' ' + t.summary + title_postfix;
         $("#content").html(Mustache.to_html(TEMPLATE.ticket, doc));
     }
+
     function timeline_day_groups(comments, tickets) {
         var days = [];
         var day = null;
@@ -278,17 +299,46 @@ $(function () {
         }
         return days;
     }
+
     function timeline(doc) {
         var tickets = doc.tickets;
         var comments = group_comments(doc.changes);
         doc.days = timeline_day_groups(comments, tickets);
         document.title = doc.title + title_postfix;
-        console.log(doc);
         $("#content").html(Mustache.to_html(TEMPLATE.timeline, doc));
     }
+
     function index(doc) {
         document.title = doc.title + title_postfix;
         $("#content").html(Mustache.to_html(TEMPLATE.index, doc));
+    }
+
+    function decorate_closed_tickets(doc) {
+        var ticket_num = /^\/ticket\/([a-fA-F0-9]+)/;
+        var lst = doc.closed_tickets;
+        function is_closed(n) {
+            /* binary search */
+            var high = lst.length - 1;
+            var low = 0;
+            while (high > low) {
+                var mid = low + ((high - low) >> 1);
+                var pair = lst[mid];
+                var start = pair[0];
+                if (n >= start) {
+                    if (n <= (start + pair[1])) {
+                        return true;
+                    }
+                    low = mid + 1;
+                } else {
+                    high = mid - 1;
+                }
+            }
+            return false;
+        }
+        $("a[href^='/ticket/']").each(function () {
+            var num = parseInt(ticket_num.exec(this.pathname)[1]);
+            this.className += ' ticket' + (is_closed(num) ? ' closed' : '');
+        });
     }
     function loaded(doc) {
         doc.wiki_format = function () { return wiki_format };
@@ -315,11 +365,14 @@ $(function () {
         if (old_hash) {
             window.location.hash = old_hash;
         }
+        $.getJSON(json_url('/closed_tickets'), decorate_closed_tickets);
     }
+
     function json_url(url) {
         url = url.split('#')[0];
         return url + (url.indexOf('?') === -1 ? '?' : '&') + 'format=json';
     }
+
     var old_hash = window.location.hash;
     if (old_hash) {
         window.location.hash = '';
