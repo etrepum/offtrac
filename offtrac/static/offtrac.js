@@ -1,4 +1,5 @@
 $(function () {
+    var History = window.History;
     var TEMPLATE = {};
     var NOW = new Date();
     var CREOLE = new Parse.Simple.Creole({});
@@ -14,6 +15,23 @@ $(function () {
       '"': '&quot;',
       "'": '&#32;'
     };
+
+    function enable_history(elem) {
+        if (!History.enabled) {
+            return;
+        }
+    }
+    
+    function render_doc(doc, opts) {
+        $("div.use-mustache-template").each(function () {
+            var template = opts[this.id];
+            if (template) {
+                $(this).html(Mustache.to_html(TEMPLATE[template], doc))
+            } else {
+                $(this).empty();
+            }
+        });
+    }
 
     function html_escape(text) {
         return text && text.replace(/[&"'><]/g, function (character) {
@@ -141,13 +159,15 @@ $(function () {
             group.match_count++;
         }
         document.title = (doc.report_id ? '{' + doc.report_id + '} ' : '') + doc.title + title_postfix;
-        $("#altlinks").html(Mustache.to_html(TEMPLATE.altlinks, doc));
-        $("#content").html(Mustache.to_html(TEMPLATE.report, doc));
+        render_doc(doc, {
+            altlinks: "altlinks",
+            content: "report"});
     }
 
     function report_list(doc) {
         document.title = doc.title + title_postfix;
-        $("#content").html(Mustache.to_html(TEMPLATE.report_list, doc));
+        render_doc(doc, {
+            content: "report_list"});
     }
 
     function milestone_list(doc) {
@@ -170,7 +190,8 @@ $(function () {
                 o.due_ago = 'No date set';
             }
         });
-        $("#content").html(Mustache.to_html(TEMPLATE.milestone_list, doc));
+        render_doc(doc, {
+            content: "milestone_list"});
     }
 
     function group_comments(changes) {
@@ -273,7 +294,8 @@ $(function () {
              * Description diff
         */
         document.title = '#' + t.id + ' ' + t.summary + title_postfix;
-        $("#content").html(Mustache.to_html(TEMPLATE.ticket, doc));
+        render_doc(doc, {
+            content: "ticket"});
     }
 
     function timeline_day_groups(comments, tickets) {
@@ -305,12 +327,14 @@ $(function () {
         var comments = group_comments(doc.changes);
         doc.days = timeline_day_groups(comments, tickets);
         document.title = doc.title + title_postfix;
-        $("#content").html(Mustache.to_html(TEMPLATE.timeline, doc));
+        render_doc(doc, {
+            content: "timeline"});
     }
 
     function index(doc) {
         document.title = doc.title + title_postfix;
-        $("#content").html(Mustache.to_html(TEMPLATE.index, doc));
+        render_doc(doc, {
+            content: "index"});
     }
 
     function decorate_closed_tickets(doc) {
@@ -377,5 +401,6 @@ $(function () {
     if (old_hash) {
         window.location.hash = '';
     }
+    enable_history($(document.body));
     $.getJSON(json_url(window.location.href), loaded);
 });
