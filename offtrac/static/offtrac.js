@@ -3,7 +3,7 @@ $(function () {
     var TEMPLATE = {};
     var NOW = new Date();
     var CREOLE = new Parse.Simple.Creole({});
-    $("script[type=text/x-mustache-template]").each(function (idx, o) {
+    $('script[type="text/x-mustache-template"]').each(function (idx, o) {
         var $o = $(o);
         TEMPLATE[$o.attr("name")] = $o.html();
     });
@@ -16,10 +16,119 @@ $(function () {
       "'": '&#32;'
     };
 
+    function default_title(doc) {
+        return doc.title + title_postfix;
+    }
+    
+    var PAGES = {};
+    PAGES.report = {
+        title: function (doc) {
+            return (doc.report_id ? '{' + doc.report_id + '} ' : '') + doc.title + title_postfix;
+        },
+        content: function (doc) {
+            var res = doc.results;
+            doc.match_count = res.length;
+            doc.groups = [];
+            doc.visible_columns = $.grep(
+                doc.columns,
+                function (s, i) { return s.charAt(0) != '_'; });
+            var group = null;
+            var prefix = doc.group ? capitalize(doc.group) + ': ' : '';
+            for (var i=0; i < res.length; i++) {
+                var r = res[i];
+                if (!group || group.id !== r.__group__) {
+                    group = {name: prefix + r.__group__, id: r.__group__, rows: [], match_count: 0};
+                    doc.groups.push(group);
+                }
+                group.rows.push({
+                    'class': 'color' + (r.__color__ || '3') + '-' + ((group.match_count % 2) ? 'odd' : 'even'),
+                    'cells': $.map(doc.visible_columns, function (k, i) {
+                        var v = r[k];
+                        var fv = null;
+                        var cls = k.toLowerCase();
+                        if (cls === 'created' || cls === 'reported' || cls === 'due') {
+                            v = ((v) ? iso_date(new Date(v)) : '');
+                        } else if (cls === 'ticket' || cls === 'summary') {
+                            fv = Mustache.to_html(TEMPLATE.ticket_link,
+                                {'ticket_id': r.ticket, 'value': ((cls === 'ticket') ? '#' : '') + v });
+                        }
+                        return {'class': cls, 'value': v, 'html_value': fv};
+                    })
+                });
+                group.match_count++;
+            }
+            return {altlinks: "altlinks", content: "report"};
+        }};
+    PAGES.report_list = {
+        content: function (doc) { return {content: 'report_list'}; }};
+    PAGES.milestone_list = {
+        content: function (doc) {
+            $.each(doc.milestones, function (i, o) {
+                o.pct_closed = Math.round((100.0 * o.closed) / o.total);
+                o.pct_open = 100 - o.pct_closed;
+                o.qname = encodeURIComponent(o.name).replace(/%20/g, '+');
+                if (o.due) {
+                    var due = new Date(o.due);
+                    o.elapsed = date_diff(due, NOW);
+                    var et = elapsed_time(o.elapsed);
+                    var dt = '(' + iso_date(due) + ')';
+                    if (o.elapsed < 0) {
+                        o.due_ago = '<strong>' + et + ' late </strong> ' + dt;
+                    } else {
+                        o.due_ago = 'Due in ' + et + ' ' + dt;
+                    }
+                } else {
+                    o.due_ago = 'No date set';
+                }
+            });
+            return {content: "milestone_list"};
+        }};
+    PAGES.ticket = {
+        title: function (doc) {
+            var t = doc.ticket; 
+            return '#' + t.id + ' ' + t.summary + title_postfix; },
+        content: function (doc) {
+            var t = doc.ticket;
+            t.comments = group_comments(t.changes);
+            /*
+            TODO:
+
+                Changes should be displayed as trac does it
+                 * Description diff
+            */
+            
+            return {content: "ticket"};
+        }};
+    PAGES.index = {
+        content: function (doc) { return {content: "index"}; }};
+    PAGES.timeline = {
+        content: function (doc) {
+            var tickets = doc.tickets;
+            var comments = group_comments(doc.changes);
+            doc.days = timeline_day_groups(comments, tickets);
+            return {content: "timeline"};
+        }};
+    /*
+    PAGES.search = {
+    };
+    */
+
     function enable_history(elem) {
         if (!History.enabled) {
             return;
         }
+        /*
+        $(elem).find("a:internal:not(.no-ajaxy)").click(function (event) {
+            // Continue as normal for cmd clicks etc
+            if (event.which === 2 || event.metaKey) {
+                return true;
+            }
+            var $this = $(this),
+                url = $this.attr("href"),
+                title = $this.attr("title") || null;
+            return false;
+        });
+        */
     }
     
     function render_doc(doc, opts) {
@@ -126,74 +235,6 @@ $(function () {
         return s.charAt(0).toUpperCase() + s.slice(1);
     }
 
-    function report(doc) {
-        var res = doc.results;
-        doc.match_count = res.length;
-        doc.groups = [];
-        doc.visible_columns = $.grep(
-            doc.columns,
-            function (s, i) { return s.charAt(0) != '_'; });
-        var group = null;
-        var prefix = doc.group ? capitalize(doc.group) + ': ' : '';
-        for (var i=0; i < res.length; i++) {
-            var r = res[i];
-            if (!group || group.id !== r.__group__) {
-                group = {name: prefix + r.__group__, id: r.__group__, rows: [], match_count: 0};
-                doc.groups.push(group);
-            }
-            group.rows.push({
-                'class': 'color' + (r.__color__ || '3') + '-' + ((group.match_count % 2) ? 'odd' : 'even'),
-                'cells': $.map(doc.visible_columns, function (k, i) {
-                    var v = r[k];
-                    var fv = null;
-                    var cls = k.toLowerCase();
-                    if (cls === 'created' || cls === 'reported' || cls === 'due') {
-                        v = ((v) ? iso_date(new Date(v)) : '');
-                    } else if (cls === 'ticket' || cls === 'summary') {
-                        fv = Mustache.to_html(TEMPLATE.ticket_link,
-                            {'ticket_id': r.ticket, 'value': ((cls === 'ticket') ? '#' : '') + v });
-                    }
-                    return {'class': cls, 'value': v, 'html_value': fv};
-                })
-            });
-            group.match_count++;
-        }
-        document.title = (doc.report_id ? '{' + doc.report_id + '} ' : '') + doc.title + title_postfix;
-        render_doc(doc, {
-            altlinks: "altlinks",
-            content: "report"});
-    }
-
-    function report_list(doc) {
-        document.title = doc.title + title_postfix;
-        render_doc(doc, {
-            content: "report_list"});
-    }
-
-    function milestone_list(doc) {
-        document.title = doc.title + title_postfix;
-        $.each(doc.milestones, function (i, o) {
-            o.pct_closed = Math.round((100.0 * o.closed) / o.total);
-            o.pct_open = 100 - o.pct_closed;
-            o.qname = encodeURIComponent(o.name).replace(/%20/g, '+');
-            if (o.due) {
-                var due = new Date(o.due);
-                o.elapsed = date_diff(due, NOW);
-                var et = elapsed_time(o.elapsed);
-                var dt = '(' + iso_date(due) + ')';
-                if (o.elapsed < 0) {
-                    o.due_ago = '<strong>' + et + ' late </strong> ' + dt;
-                } else {
-                    o.due_ago = 'Due in ' + et + ' ' + dt;
-                }
-            } else {
-                o.due_ago = 'No date set';
-            }
-        });
-        render_doc(doc, {
-            content: "milestone_list"});
-    }
-
     function group_comments(changes) {
         var comments = [];
         var comment = null;
@@ -284,20 +325,6 @@ $(function () {
         return (' ' + render(t) + ' ');
     }
 
-    function ticket(doc) {
-        var t = doc.ticket;
-        t.comments = group_comments(t.changes);
-        /*
-        TODO:
-
-            Changes should be displayed as trac does it
-             * Description diff
-        */
-        document.title = '#' + t.id + ' ' + t.summary + title_postfix;
-        render_doc(doc, {
-            content: "ticket"});
-    }
-
     function timeline_day_groups(comments, tickets) {
         var days = [];
         var day = null;
@@ -320,21 +347,6 @@ $(function () {
             day.day_changes.push(o);
         }
         return days;
-    }
-
-    function timeline(doc) {
-        var tickets = doc.tickets;
-        var comments = group_comments(doc.changes);
-        doc.days = timeline_day_groups(comments, tickets);
-        document.title = doc.title + title_postfix;
-        render_doc(doc, {
-            content: "timeline"});
-    }
-
-    function index(doc) {
-        document.title = doc.title + title_postfix;
-        render_doc(doc, {
-            content: "index"});
     }
 
     function decorate_closed_tickets(doc) {
@@ -371,21 +383,11 @@ $(function () {
         if (doc.user) {
             $("span.username").html(doc.user);
         }
-        if (doc.template === 'report') {
-            report(doc);
-        } else if (doc.template === 'report_list') {
-            report_list(doc);
-        } else if (doc.template === 'milestone_list') {
-            milestone_list(doc);
-        } else if (doc.template === 'ticket') {
-            ticket(doc);
-        } else if (doc.template === 'index') {
-            index(doc);
-        } else if (doc.template === 'timeline') {
-            timeline(doc);
-        }/* else if (doc.template === 'search') {
-            trac_search(doc);
-        }*/
+        var page = PAGES[doc.template];
+        if (page) {
+            render_doc(doc, page.content(doc));
+            document.title = (page.title ? page.title(doc) : default_title(doc));
+        }
         if (old_hash) {
             window.location.hash = old_hash;
         }
