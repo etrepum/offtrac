@@ -388,8 +388,11 @@ $(function () {
             render_doc(doc, page.content(doc));
             document.title = (page.title ? page.title(doc) : default_title(doc));
         }
-        if (old_hash) {
-            window.location.hash = old_hash;
+        if (scroll_hash) {
+            var ofs = $(scroll_hash.replace(':', '\\:')).offset();
+            if (ofs) {
+                $("html, body").scrollTop(ofs.top);
+            }
         }
         $.getJSON(json_url('/closed_tickets'), decorate_closed_tickets);
     }
@@ -399,10 +402,7 @@ $(function () {
         return url + (url.indexOf('?') === -1 ? '?' : '&') + 'format=json';
     }
 
-    var old_hash = window.location.hash;
-    if (old_hash) {
-        window.location.hash = '';
-    }
+    var scroll_hash = window.location.hash;
     enable_history($(document.body));
     $.getJSON(json_url(window.location.href), loaded);
 });
