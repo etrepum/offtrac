@@ -3,6 +3,7 @@ $(function () {
     var TEMPLATE = {};
     var NOW = new Date();
     var CREOLE = new Parse.Simple.Creole({});
+
     $('script[type="text/x-mustache-template"]').each(function (idx, o) {
         var $o = $(o);
         TEMPLATE[$o.attr("name")] = $o.html();
@@ -113,31 +114,43 @@ $(function () {
     };
     */
 
+    function strip_fragment(s) {
+        return (s || '').replace(/#.*$/, '');
+    }
+
     function enable_history(elem) {
         if (!History.enabled) {
             return;
         }
-        /*
-        $(elem).find("a:internal:not(.no-ajaxy)").click(function (event) {
-            // Continue as normal for cmd clicks etc
-            if (event.which === 2 || event.metaKey) {
+        var rootUrl = History.getRootUrl();
+        var pageUrl = strip_fragment(document.location.href);
+        function should_hook_history() {
+            var url = this.href || '';
+            return url && (url.substring(0, rootUrl.length) === rootUrl || url.indexOf(':') === -1);
+        }
+        $(elem).find("a:not(.no-ajaxy)").filter(should_hook_history).click(function (event) {
+            // Continue as normal for cmd clicks and fragments
+            if (event.which === 2 || event.metaKey || strip_fragment(this.href) === pageUrl) {
                 return true;
             }
-            var $this = $(this),
-                url = $this.attr("href"),
-                title = $this.attr("title") || null;
+            load_url(this.href);
+            event.preventDefault();
             return false;
         });
-        */
     }
     
     function render_doc(doc, opts) {
+        doc.wiki_format = function () { return wiki_format };
+        doc.change_format = function () { return change_format };
+        doc.ago = function () { return ago_format; }
         $("div.use-mustache-template").each(function () {
-            var template = opts[this.id];
+            var template = opts[this.id],
+                $this = $(this);
             if (template) {
-                $(this).html(Mustache.to_html(TEMPLATE[template], doc))
+                $this.html(Mustache.to_html(TEMPLATE[template], doc));
+                enable_history($this);
             } else {
-                $(this).empty();
+                $this.empty();
             }
         });
     }
@@ -376,24 +389,26 @@ $(function () {
             this.className += ' ticket' + (is_closed(num) ? ' closed' : '');
         });
     }
-    function loaded(doc) {
-        doc.wiki_format = function () { return wiki_format };
-        doc.change_format = function () { return change_format };
-        doc.ago = function () { return ago_format; }
+
+    function loaded(doc, url) {
         if (doc.user) {
             $("span.username").html(doc.user);
         }
         var page = PAGES[doc.template];
+        var state = {content: {}, title: '', doc: doc, url: url};
         if (page) {
-            render_doc(doc, page.content(doc));
-            document.title = (page.title ? page.title(doc) : default_title(doc));
+            state.title = (page.title ? page.title(doc) : default_title(doc));
         }
-        if (scroll_hash) {
-            var ofs = $(scroll_hash.replace(':', '\\:')).offset();
-            if (ofs) {
-                $("html, body").scrollTop(ofs.top);
-            }
-        }
+        return state;
+    }
+    
+    function render_state(state) {
+        var doc = state.doc;
+        var page = PAGES[doc.template];
+        render_doc(doc, (page ? page.content(doc): {}));
+        $((document.location.hash || '').replace(':', '\\:')).each(function () {
+            $("html, body").scrollTop($(this).offset().top);
+        });
         $.getJSON(json_url('/closed_tickets'), decorate_closed_tickets);
     }
 
@@ -402,7 +417,25 @@ $(function () {
         return url + (url.indexOf('?') === -1 ? '?' : '&') + 'format=json';
     }
 
-    var scroll_hash = window.location.hash;
+    function load_url(url) {
+        render_doc({}, {content: 'loading'});
+        var xhr = $.getJSON(json_url(url)).pipe(function (doc) {
+            return loaded(doc, url);
+        });
+        if (History.enabled) {
+            xhr.done(function (state) {
+                History.pushState(state, state.title, state.url);
+            });
+        } else {
+            xhr.done(render_state);
+        }
+    }
+
     enable_history($(document.body));
-    $.getJSON(json_url(window.location.href), loaded);
+    load_url(document.location.href);
+
+    $(window).bind('statechange', function () {
+        var state = History.getState();
+        render_state(state.data);
+    });
 });
